@@ -318,6 +318,11 @@ textarea.input{min-height:84px;resize:vertical}
    but data syncs to the Claude account. Hosted on its own (e.g. GitHub Pages) everything works and
    data is kept on the device. */
 const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.claude; }catch(e){ return true; } })();
+/* Shared crews (hosted version only). Fill these in from Supabase → Project Settings → API.
+   Both values are safe to publish: the database only answers to a crew name + passcode. */
+const SUPABASE_URL = '';   // e.g. 'https://abcdefgh.supabase.co'
+const SUPABASE_KEY = '';   // the "anon" / "publishable" key
+const CREW_ON = !IN_CLAUDE && !!SUPABASE_URL && !!SUPABASE_KEY;
 const LEAFLET_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
 const LEAFLET_CSS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
 
@@ -464,7 +469,7 @@ let saveTimer=null;
 function saveLocal(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(async ()=>{
-    const snap={meta:clone(metaObj()), items:clone(S.items)};
+    const snap={meta:clone(metaObj()), items:clone(S.items), sync:crewSync?clone(crewSync):null};
     try{ await idb.set('state', snap); try{ localStorage.removeItem(LS_KEY); }catch(_){} return; }catch(e){}
     try{ localStorage.setItem(LS_KEY, JSON.stringify(snap)); }
     catch(e){ try{ const lite={}; for(const [k,v] of Object.entries(snap.items)) lite[k]={...v, photo:null}; localStorage.setItem(LS_KEY, JSON.stringify({meta:snap.meta, items:lite})); toast('Storage is full, so photos were not saved.'); }catch(_){} }
@@ -475,7 +480,7 @@ async function loadLocal(){
   try{ d=await idb.get('state'); }catch(e){}
   if(!d){ try{ const raw=localStorage.getItem(LS_KEY); if(raw) d=JSON.parse(raw); }catch(e){} }
   if(!d || !d.meta || !d.meta.profiles?.length) return false;
-  applySnapshot(d); return true;
+  applySnapshot(d); crewSync=d.sync||null; return true;
 }
 function applySnapshot(d){ S={profiles:d.meta.profiles, activeId:d.meta.activeId, orders:d.meta.orders||{}, items:d.items||{}}; }
 
@@ -495,6 +500,7 @@ function onRemoteError(e){
 function commit({items=[], del=[]}={}){
   if(!persisted){ persisted=true; items=Object.keys(S.items); try{ navigator.storage?.persist?.(); }catch(_){} }
   saveLocal();
+  if(crew) scheduleSync();
   if(!remote) return;
   items.forEach(id=>{ const it=S.items[id]; if(it) enqueue('item_'+id, ()=>remote.col.doc('item_'+id).set(clone(it))); });
   del.forEach(id=>enqueue('item_'+id, ()=>remote.col.doc('item_'+id).delete()));
@@ -521,6 +527,141 @@ async function connectRemote(){
     render();
   }catch(e){ syncMode='device'; render(); }
 }
+
+/* ============ shared crew (hosted version) ============
+   Everyone in a crew shares one set of profiles and rankings through Supabase.
+   Docs: profile_<id>, orders_<profileId>, item_<id>. Which profile you are stays on the device.
+   crewSync.h remembers a hash of each doc as last agreed with the server, so we only send what
+   changed here and only take remote changes for docs we haven't edited since. */
+let crew=null, crewSync=null, syncBusy=false, syncAgain=false, syncTimer=null, crewErr='', lastSyncAt=0;
+try{ crew=CREW_ON ? JSON.parse(localStorage.getItem('tummi_crew')||'null') : null; }catch(_){ crew=null; }
+function saveCrew(){ try{ crew ? localStorage.setItem('tummi_crew', JSON.stringify(crew)) : localStorage.removeItem('tummi_crew'); }catch(_){} }
+function hashStr(str){ let h=5381; for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))|0; return (h>>>0).toString(36)+'.'+str.length; }
+async function rpc(fn, args){
+  const headers={'Content-Type':'application/json', apikey:SUPABASE_KEY};
+  if(SUPABASE_KEY.startsWith('eyJ')) headers.Authorization='Bearer '+SUPABASE_KEY;
+  let r;
+  try{ r=await fetch(SUPABASE_URL.replace(/\/+$/,'')+'/rest/v1/rpc/'+fn,{method:'POST', headers, body:JSON.stringify(args)}); }
+  catch(e){ const err=new Error("Can't reach the crew right now."); err.offline=true; throw err; }
+  const txt=await r.text(); let body=null; try{ body=txt?JSON.parse(txt):null; }catch(_){}
+  if(!r.ok){ const err=new Error((body&&body.message)||('Server error '+r.status)); err.code=body&&body.code; throw err; }
+  return body;
+}
+function crewDocs(){
+  const out={};
+  const demoItem=id=>S.items[id]?.demo;
+  for(const p of S.profiles) if(!p.demo) out['profile_'+p.id]=p;
+  for(const [pid,o] of Object.entries(S.orders)){
+    if(!profile(pid) || profile(pid).demo) continue;
+    const c={}; for(const [cat,bk] of Object.entries(o)){ c[cat]={}; for(const b of BUCKETS) c[cat][b.k]=(bk[b.k]||[]).filter(id=>!demoItem(id)); }
+    out['orders_'+pid]=c;
+  }
+  for(const it of Object.values(S.items)) if(!it.demo) out['item_'+it.id]=it;
+  return out;
+}
+function applyDoc(id, data){
+  if(id.startsWith('profile_')){ const pid=id.slice(8); const i=S.profiles.findIndex(p=>p.id===pid);
+    if(data){ i>=0 ? (S.profiles[i]=clone(data)) : S.profiles.push(clone(data)); } else if(i>=0) S.profiles.splice(i,1); }
+  else if(id.startsWith('orders_')){ const pid=id.slice(7); if(data) S.orders[pid]=clone(data); else delete S.orders[pid]; }
+  else if(id.startsWith('item_')){ const iid=id.slice(5); if(data) S.items[iid]=clone(data); else delete S.items[iid]; }
+}
+function stripDemo(){
+  for(const it of Object.values(S.items)) if(it.demo) delete S.items[it.id];
+  S.profiles=S.profiles.filter(p=>!p.demo || Object.values(S.items).some(i=>i.profileId===p.id));
+  for(const pid in S.orders){ if(!profile(pid)){ delete S.orders[pid]; continue; }
+    for(const cat in S.orders[pid]) for(const b of BUCKETS) S.orders[pid][cat][b.k]=(S.orders[pid][cat][b.k]||[]).filter(id=>S.items[id]); }
+  for(const it of Object.values(S.items)) if(it.tie==='tdemo') it.tie=null;
+}
+function scheduleSync(ms=600){ clearTimeout(syncTimer); syncTimer=setTimeout(syncNow, ms); }
+async function syncNow(){
+  if(!crew) return;
+  if(syncBusy){ syncAgain=true; return; }
+  syncBusy=true; syncAgain=false;
+  crewSync ??= {cursor:null, h:{}};
+  const h=crewSync.h;
+  try{
+    // push what changed on this phone
+    const cur=crewDocs(); const out=[];
+    for(const [id,doc] of Object.entries(cur)){ const str=JSON.stringify(doc); const hs=hashStr(str); if(h[id]!==hs) out.push({id, data:doc, hs, size:str.length}); }
+    for(const id of Object.keys(h)) if(!(id in cur)) out.push({id, data:null, hs:null, size:20});
+    let batch=[], size=0;
+    const flush=async()=>{ if(!batch.length) return; await rpc('tummi_push',{p_code:crew.code, p_pass:crew.pass, p_docs:batch.map(d=>({id:d.id, data:d.data}))});
+      batch.forEach(d=>{ d.hs ? (h[d.id]=d.hs) : delete h[d.id]; }); batch=[]; size=0; };
+    for(const d of out){ if(size+d.size>1500000) await flush(); batch.push(d); size+=d.size; }
+    await flush();
+    // pull what others changed (not while a sheet is open, so nothing moves under you)
+    if(!ui.sheet){
+      const since=crewSync.cursor ? new Date(new Date(crewSync.cursor).getTime()-15000).toISOString() : null;
+      const res=await rpc('tummi_pull',{p_code:crew.code, p_pass:crew.pass, p_since:since});
+      const now=crewDocs(); let changed=false;
+      for(const {id,data} of res.docs||[]){
+        const local=now[id]? hashStr(JSON.stringify(now[id])) : undefined;
+        if(local!==h[id]) continue;                 // edited here since last sync; ours goes up next round
+        const remoteH=data? hashStr(JSON.stringify(data)) : undefined;
+        if(remoteH===local) continue;
+        if(hasDemo()) stripDemo();
+        applyDoc(id, data); remoteH ? (h[id]=remoteH) : delete h[id]; changed=true;
+      }
+      crewSync.cursor=res.now;
+      if(changed){
+        if(!S.profiles.length) S.profiles=[{id:'p_'+uid(), name:'Me', color:P_COLORS[0]}];
+        if(!profile(S.activeId)) S.activeId=S.profiles[0].id;
+        if(!ui.sheet) renderMain();
+      }
+    }
+    crewErr=''; lastSyncAt=Date.now(); syncMode='crew';
+  }catch(e){
+    if(e.code==='28P01'){ crewErr='The crew passcode no longer works. Leave the crew and join again.'; }
+    else crewErr=e.offline ? "Can't reach the crew. Changes are saved here and will sync later." : 'Sync hiccup: '+e.message;
+    syncMode='crew-err';
+  }finally{
+    syncBusy=false; saveLocal();
+    if(ui.tab==='crew' && ui.crew==='profiles' && !ui.sheet) renderMain();
+    if(syncAgain) scheduleSync(300);
+  }
+}
+async function joinCrew(code, pass, create, bring){
+  await rpc('tummi_join',{p_code:code, p_pass:pass, p_create:create});
+  const res=await rpc('tummi_pull',{p_code:code, p_pass:pass, p_since:null});
+  const remoteDocs=res.docs||[];
+  const mine= bring ? (stripDemo(), clone(S)) : null;
+  const myActive=activeProfile();
+  S={profiles:[], activeId:null, orders:{}, items:{}};
+  crewSync={cursor:res.now, h:{}};
+  for(const {id,data} of remoteDocs){ if(!data) continue; applyDoc(id,data); crewSync.h[id]=hashStr(JSON.stringify(data)); }
+  let me=null;
+  if(mine && mine.profiles.length){
+    // bring this phone's profiles along; same name means same person
+    const map={};
+    for(const p of mine.profiles){
+      const same=S.profiles.find(x=>norm(x.name)===norm(p.name));
+      if(same) map[p.id]=same.id;
+      else { const np={...p, id:(p.id==='p_me'||profile(p.id))?'p_'+uid():p.id, demo:false}; S.profiles.push(np); map[p.id]=np.id; }
+    }
+    for(const it of Object.values(mine.items)){ S.items[it.id]={...it, profileId:map[it.profileId]||it.profileId, withIds:(it.withIds||[]).map(x=>map[x]||x)}; }
+    for(const [pid,o] of Object.entries(mine.orders)){
+      const to=map[pid]||pid;
+      for(const [cat,bk] of Object.entries(o)){ for(const b of BUCKETS){ const dst=catOrder(to,cat)[b.k]; for(const id of bk[b.k]||[]) if(!dst.includes(id)) dst.push(id); } }
+    }
+    me=map[mine.activeId]||null;
+  }
+  crew={code:code.trim().toLowerCase(), name:code.trim(), pass};
+  saveCrew();
+  let fresh=false;
+  if(!S.profiles.length){ S.profiles=[{id:'p_'+uid(), name:(myActive&&!myActive.demo&&myActive.name)||'Me', color:(myActive&&myActive.color)||P_COLORS[0]}]; fresh=true; }
+  S.activeId= me || S.profiles[0].id;
+  ui.cmpA=S.activeId; persisted=true; syncMode='crew';
+  saveLocal(); startCrewLoop(); await syncNow();
+  return {fresh, picked:!!me};
+}
+let crewLoop=false;
+function startCrewLoop(){
+  if(crewLoop) return; crewLoop=true;
+  setInterval(()=>{ if(crew && document.visibilityState==='visible') syncNow(); }, 15000);
+  document.addEventListener('visibilitychange', ()=>{ if(crew && document.visibilityState==='visible') syncNow(); });
+  addEventListener('online', ()=>{ if(crew) syncNow(); });
+}
+function leaveCrew(){ crew=null; crewSync=null; crewErr=''; saveCrew(); syncMode='local'; saveLocal(); }
 
 /* ============ backup (hosted version) ============ */
 function exportBackup(){
@@ -619,7 +760,7 @@ function header(){
   const p=activeProfile();
   return `<header class="top"><h1 class="wordmark" aria-label="tummi">tummi<i>.</i></h1>
     <button class="me" data-a="switcher" aria-label="Switch profile">${avatar(p,30)}<span>${esc(p.name)}</span>${ic.chev}</button></header>
-    ${hasDemo()?`<div class="banner"><p>These are sample rankings so you can try things out. Your own rankings stay when you clear them.</p><button data-a="clear-demo">Clear samples</button></div>`:''}`;
+    ${hasDemo()&&!crew?`<div class="banner"><p>These are sample rankings so you can try things out. Your own rankings stay when you clear them.</p><button data-a="clear-demo">Clear samples</button></div>`:''}`;
 }
 function tabbar(){
   const t=(k,label,icon)=>`<button class="tab ${ui.tab===k?'on':''}" data-a="tab" data-tab="${k}" aria-current="${ui.tab===k}">${icon}<span>${label}</span></button>`;
@@ -821,7 +962,8 @@ function viewGroup(){
     <p class="muted" style="font-size:13px;margin:14px 4px">Group score is the average of everyone's score for that spot. The range shows the lowest and highest.</p>`;
 }
 function viewProfiles(){
-  const syncText={cloud:['Saved to your Claude account','var(--liked)'],connecting:['Connecting to your account…','var(--pizza)'],device:['Saved on this device only','#BFA98F'],local:['Saved on this device. Back up to move it to another phone.','var(--pizza)']}[syncMode];
+  const ago=lastSyncAt? (Date.now()-lastSyncAt<60000?'just now':Math.round((Date.now()-lastSyncAt)/60000)+' min ago') : 'not yet';
+  const syncText={crew:[`Shared with crew “${esc(crew?.name||'')}” · synced ${ago}`,'var(--liked)'],'crew-err':[esc(crewErr||'Not synced yet'),'var(--pizza)'],cloud:['Saved to your Claude account','var(--liked)'],connecting:['Connecting to your account…','var(--pizza)'],device:['Saved on this device only','#BFA98F'],local:['Saved on this device. Back up to move it to another phone.','var(--pizza)']}[syncMode];
   return `<div class="stack">${S.profiles.map(p=>{ const n=Object.values(S.items).filter(i=>i.profileId===p.id);
       const per=CATS.map(c=>[c,n.filter(i=>i.cat===c.k).length]).filter(x=>x[1]).map(([c,k])=>`${c.name} ${k}`).join(' · ');
       return `<div class="card pcard">${avatar(p,48)}<div><div class="pn">${esc(p.name)}</div><div class="ps num">${n.length} ranked${per?' · '+per:''}</div></div>
@@ -832,13 +974,29 @@ function viewProfiles(){
     <div class="card"><p class="muted" style="margin:0 0 12px;line-height:1.45">You never type a number. Pick how it was, answer a few "which was better?" questions, and Tummi works out the score from where it lands.</p><button class="btn block" data-a="info">See the scoring rules</button></div>
     <h3 class="section-title">Data</h3>
     <div class="card stack"><div class="sync" style="--sc:${syncText[1]}"><i></i>${syncText[0]}</div>
-      ${!IN_CLAUDE?`<div class="two"><button class="btn sm" data-a="export">Back up</button><label class="btn sm" for="imp" style="cursor:pointer">Restore<input id="imp" type="file" accept="application/json,.json" data-change="import" hidden></label></div>`:''}
-      ${!hasDemo()?'<button class="btn block" data-a="demo">Load sample data</button>':''}
-      <button class="btn block danger ${ui.armReset?'armed':''}" data-a="reset">${ui.armReset?'Tap again to erase everything':'Erase all profiles and rankings'}</button></div>`;
+      ${CREW_ON && crew?`<div class="two"><button class="btn sm" data-a="crew-sync">Sync now</button><button class="btn sm" data-a="crew-leave">Leave crew</button></div>`:''}
+      ${CREW_ON && !crew?`<button class="btn block primary" data-a="crew-open">Join or start a crew</button><p class="muted" style="margin:0;font-size:13px;line-height:1.4">A crew shares profiles and rankings between everyone's phones, protected by a passcode.</p>`:''}
+      ${!IN_CLAUDE && !crew?`<div class="two"><button class="btn sm" data-a="export">Back up</button><label class="btn sm" for="imp" style="cursor:pointer">Restore<input id="imp" type="file" accept="application/json,.json" data-change="import" hidden></label></div>`:''}
+      ${!IN_CLAUDE && crew?`<button class="btn sm" data-a="export">Back up a copy</button>`:''}
+      ${!hasDemo()&&!crew?'<button class="btn block" data-a="demo">Load sample data</button>':''}
+      ${crew?'':`<button class="btn block danger ${ui.armReset?'armed':''}" data-a="reset">${ui.armReset?'Tap again to erase everything':'Erase all profiles and rankings'}</button>`}</div>`;
 }
 const VIEWS={lists:viewLists, map:viewMap, areas:viewAreas, crew:viewCrew};
 
 /* ============ sheets ============ */
+function sheetCrew(){
+  const sh=ui.sheet; const create=sh.mode==='create';
+  const mine=Object.values(S.items).filter(i=>!i.demo).length;
+  return `<div class="panel" role="dialog" aria-label="Crew"><div class="grab"></div><h2 style="margin:0 4px 6px">${create?'Start a crew':'Join your crew'}</h2>
+    <p class="muted" style="margin:0 4px 14px;line-height:1.45">${create?'Pick a crew name and passcode, then share both with your friends.':'Use the crew name and passcode your friend set up.'}</p>
+    <div class="seg"><button class="${!create?'on':''}" data-a="crew-mode" data-v="join">Join</button><button class="${create?'on':''}" data-a="crew-mode" data-v="create">Start new</button></div>
+    ${sh.error?`<div class="err">${esc(sh.error)}</div>`:''}
+    <div class="field"><label for="cr-code">Crew name</label><input id="cr-code" class="input" value="${esc(sh.code||'')}" placeholder="e.g. detroit-eaters" maxlength="40" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+    <div class="field"><label for="cr-pass">Passcode</label><input id="cr-pass" class="input" type="password" value="${esc(sh.pass||'')}" placeholder="${create?'At least 6 characters':''}" autocomplete="off"></div>
+    ${mine?`<label style="display:flex;gap:10px;align-items:flex-start;margin:0 2px 16px;font-size:15px;line-height:1.35"><input id="cr-bring" type="checkbox" ${sh.bring!==false?'checked':''} style="width:20px;height:20px;margin:1px 0 0;accent-color:var(--ink)"><span>Add the ${mine} ${mine===1?'ranking':'rankings'} on this phone to the crew</span></label>`:''}
+    <button class="btn block primary" data-a="crew-go" ${sh.busy?'disabled':''}>${sh.busy?'Connecting…':create?'Start crew':'Join crew'}</button>
+    <button class="btn block" data-a="close" style="margin-top:10px">${sh.first?'Not now, use this phone only':'Cancel'}</button></div>`;
+}
 function sheetSwitcher(){
   return `<div class="panel" role="dialog" aria-label="Switch profile"><div class="grab"></div><h2 style="margin:0 4px 12px">Who's eating?</h2>
     <div class="stack">${S.profiles.map(p=>`<button class="card pcard" data-a="switch" data-id="${p.id}" style="text-align:left">${avatar(p,40)}<div class="pn">${esc(p.name)}</div>${p.id===S.activeId?'<span class="pill-on">Active</span>':'<span></span>'}</button>`).join('')}
@@ -1067,7 +1225,7 @@ function geoHere(){
 function renderSheet(){
   const el=$('#sheet');
   if(!ui.sheet){ el.className=''; el.innerHTML=''; document.body.classList.remove('locked'); return; }
-  const builders={switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
+  const builders={crew:sheetCrew, switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
   const inner=builders[ui.sheet.type]();
   if(!ui.sheet){ renderSheet(); return; }
   const prevSc = el.querySelector('.sheet-body, .panel:not(.full)');
@@ -1145,7 +1303,29 @@ document.addEventListener('click', e=>{
     case 'switcher': ui.sheet={type:'switcher'}; renderSheet(); break;
     case 'manage': ui.sheet=null; ui.tab='crew'; ui.crew='profiles'; render(); break;
     case 'switch': S.activeId=d.id; ui.cmpA=d.id; ui.area=''; ui.mapFit=true; commit(); ui.sheet=null; render(); toast(`Ranking as ${profile(d.id).name}`); break;
-    case 'close': closeSheet(); break;
+    case 'close': if(ui.sheet?.type==='crew' && ui.sheet.first){ try{ localStorage.setItem('tummi_crew_skip','1'); }catch(_){} } closeSheet(); break;
+    case 'crew-open': ui.sheet={type:'crew', mode:'join'}; renderSheet(); break;
+    case 'crew-mode': { const sh=ui.sheet; sh.code=$('#cr-code').value; sh.pass=$('#cr-pass').value; sh.bring=$('#cr-bring')?$('#cr-bring').checked:sh.bring; sh.mode=d.v; sh.error=''; renderSheet(); } break;
+    case 'crew-go': {
+      const sh=ui.sheet; if(sh.busy) break;
+      sh.code=$('#cr-code').value.trim(); sh.pass=$('#cr-pass').value; sh.bring=$('#cr-bring')?$('#cr-bring').checked:false;
+      if(sh.code.length<3){ sh.error='Crew name needs at least 3 characters.'; renderSheet(); break; }
+      if(sh.mode==='create' && sh.pass.length<6){ sh.error='Passcode needs at least 6 characters.'; renderSheet(); break; }
+      if(!sh.pass){ sh.error='Enter the passcode.'; renderSheet(); break; }
+      sh.busy=true; sh.error=''; renderSheet();
+      joinCrew(sh.code, sh.pass, sh.mode==='create', sh.bring).then(r=>{
+        ui.tab='lists'; ui.area=''; ui.mapFit=true;
+        if(r.fresh){ const p=S.profiles[0]; ui.sheet={type:'profile', id:p.id, draft:{name:p.name, color:p.color}}; render(); toast('Crew started. Check your name.'); }
+        else if(!r.picked){ ui.sheet={type:'switcher'}; render(); toast("You're in. Pick yourself, or tap Add a friend to add you."); }
+        else { ui.sheet=null; render(); toast("You're in the crew"); }
+      }).catch(e=>{ sh.busy=false;
+        sh.error = e.offline ? "Can't reach the crew server. Check your connection." : e.code==='28P01' ? 'Wrong crew name or passcode.' : e.code==='23505' ? 'That crew name is taken. Pick another, or switch to Join.' : e.message;
+        if(ui.sheet===sh) renderSheet(); });
+    } break;
+    case 'crew-sync': syncNow(); toast('Syncing…'); break;
+    case 'crew-leave':
+      if(!ui.armLeave){ ui.armLeave=true; toast('Tap Leave crew again to disconnect this phone. It keeps a copy.'); setTimeout(()=>{ ui.armLeave=false; },4000); break; }
+      ui.armLeave=false; leaveCrew(); renderMain(); toast('Left the crew. This phone kept a copy.'); break;
     case 'info': ui.sheet={type:'info'}; renderSheet(); break;
     case 'export': exportBackup(); break;
     case 'demo': buildDemo(); ui.mapFit=true; commit({items:Object.keys(S.items)}); render(); toast('Sample data loaded'); break;
@@ -1218,14 +1398,26 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ui.sheet && !(u
 
 /* ============ boot ============ */
 (async function boot(){
-  if(await loadLocal()){ persisted=true; }
+  const loaded=await loadLocal();
+  if(loaded){ persisted=true; }
+  else if(crew){
+    // joined before but this phone's copy is gone: wait for the crew's data instead of inventing a profile
+    S={profiles:[{id:'p_wait', name:'Loading', color:P_COLORS[0], demo:true}], activeId:'p_wait', orders:{}, items:{}}; crewSync=null;
+  }
   else {
     S={profiles:[{id:'p_me', name:'Andrew', color:'#DD5A3E'}], activeId:'p_me', orders:{}, items:{}};
     buildDemo(); persisted=false; // samples are shown, not saved, until you change something
   }
   ui.cmpA=S.activeId;
+  if(crew) syncMode='crew';
+  if(crew && loaded){ if(hasDemo()) stripDemo(); if(!S.profiles.length) S.profiles=[{id:'p_'+uid(), name:'Me', color:P_COLORS[0]}]; if(!profile(S.activeId)) S.activeId=S.profiles[0].id; }
   render();
   connectRemote();
+  if(CREW_ON){
+    if(crew){ startCrewLoop(); syncNow(); }
+    else { let skip=false; try{ skip=!!localStorage.getItem('tummi_crew_skip'); }catch(_){}
+      if(!skip){ ui.sheet={type:'crew', mode:'join', first:true}; renderSheet(); } }
+  }
 })();
 </script>
 </body>
