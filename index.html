@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF6E6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tummi">
+<title>Tummi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one phone-width column on cream, chunky rounded cards, food-colored accents, floating tab bar with a center "rank" button. */
+:root{
+  --cream:#FBF5EA;
+  --cream-2:#F3EADB;
+  --card:#FFFDF9;
+  --ink:#231811;
+  --ink-2:#76675A;
+  --line:#E9DDCB;
+  --burger:#DD5A3E; --burger-ink:#B4412A;
+  --pizza:#E6A23C;  --pizza-ink:#8F6114;
+  --tacos:#2F9A78;  --tacos-ink:#1F7559;
+  --wings:#C9527A;  --wings-ink:#A13A5E;
+  --steak:#8A4536;
+  --grape:#6656D8;
+  --liked:#2F9A6C; --fine:#E6A23C; --disliked:#D9573D;
+  --f-display:'Outfit', 'Figtree', system-ui, sans-serif;
+  --f-body:'Figtree', system-ui, -apple-system, sans-serif;
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+  --shadow:0 1px 2px rgba(35,24,17,.05), 0 6px 18px -10px rgba(35,24,17,.16);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--f-body);font-weight:500;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body.locked{overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,label:focus-within{outline:3px solid var(--grape);outline-offset:2px}
+input,textarea,select{font:inherit;font-size:16px;color:var(--ink)}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;letter-spacing:-.01em;margin:0;text-wrap:balance}
+img{max-width:100%;display:block}
+.num{font-variant-numeric:tabular-nums}
+
+#app{max-width:520px;margin:0 auto;min-height:100%;padding:calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 110px)}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 14px}
+.wordmark{font-family:var(--f-display);font-weight:600;font-size:32px;letter-spacing:-.04em;line-height:1;display:flex;align-items:baseline;color:var(--ink)}
+.wordmark i{font-style:normal;color:var(--burger)}
+.me{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:4px 12px 4px 4px;font-weight:600}
+.me svg{width:14px;height:14px;opacity:.6}
+.av{display:inline-grid;place-items:center;border-radius:50%;background:var(--pc);color:#fff;font-family:var(--f-display);font-weight:600;flex:none;line-height:1;letter-spacing:0}
+
+.banner{display:flex;gap:10px;align-items:center;background:var(--ink);color:var(--cream);border-radius:var(--r-md);padding:10px 12px;margin-bottom:14px;font-size:14px}
+.banner p{margin:0;flex:1;line-height:1.3}
+.banner button{background:var(--cream);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;white-space:nowrap}
+
+/* category tabs */
+.cats{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 14px;padding:2px 16px 4px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);font-weight:600;font-size:15px}
+.cat .e{color:var(--cc)}
+.cat .e{width:18px;height:18px;display:grid}
+.ico{width:100%;height:100%;display:block}
+.cat .n{font-size:12px;background:var(--cream-2);border-radius:999px;padding:1px 7px;min-width:22px;text-align:center;font-weight:700}
+.cat.on{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.cat.on .e{color:var(--cc)}
+.cat.on .n{background:rgba(255,255,255,.14)}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--cream-2);border-radius:999px;padding:4px;margin-bottom:14px}
+.seg button{padding:9px 6px;border-radius:999px;font-weight:700;font-size:14px;color:var(--ink-2)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+
+.list-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 2px 10px}
+.list-head h2{font-size:24px;font-weight:500}
+.list-head .sub{color:var(--ink-2);font-size:14px}
+.filters{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.select{display:flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:0 6px 0 12px;font-weight:700;font-size:14px;position:relative}
+.select.on{border-color:var(--ink)}
+.select select{appearance:none;-webkit-appearance:none;background:transparent;border:0;padding:8px 24px 8px 0;font-size:15px;font-weight:600;max-width:200px}
+.select > svg{width:14px;height:14px;position:absolute;right:10px;pointer-events:none;opacity:.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{padding:6px 12px;border-radius:999px;background:var(--cream-2);font-size:13px;font-weight:700;color:var(--ink-2);border:2px solid transparent}
+.chip.on{background:var(--ink);color:var(--cream)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--cream-2);border-radius:var(--r-md);padding:10px 12px;font-size:13.5px;color:var(--ink-2);margin-bottom:12px;line-height:1.35}
+.note b{color:var(--ink)}
+.note .dot{width:10px;height:10px;border-radius:50%;background:var(--pizza);flex:none;margin-top:4px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.5);opacity:.5}}
+.linkish{text-decoration:underline;font-weight:700;color:var(--ink)}
+
+/* rows */
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:30px 52px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border-radius:var(--r-md);padding:8px 10px 8px 6px;box-shadow:var(--shadow);border-left:4px solid var(--bc);transition:transform .15s}
+.row:active{transform:scale(.98)}
+.row.flash{animation:flash 1.4s ease-out}
+.row.area{grid-template-columns:30px 1fr auto}
+@keyframes flash{0%{background:#FFF0B8;transform:scale(1.03)}100%{background:var(--card)}}
+.rank{font-family:var(--f-display);font-size:17px;font-weight:500;text-align:center;color:var(--ink-2)}
+.thumb{width:52px;height:52px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:color-mix(in srgb, var(--cc) 14%, var(--card));color:var(--cc)}
+.thumb .ico{width:46%;height:46%}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.meta{min-width:0}
+.name{font-weight:600;font-size:16px;line-height:1.2;overflow-wrap:anywhere}
+.sub{color:var(--ink-2);font-size:13px;margin-top:2px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--cream-2);border-radius:6px;padding:1px 7px;font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.tag .ico{width:12px;height:12px;color:var(--cc)}
+.right{display:flex;flex-direction:column;align-items:center;gap:4px}
+.score{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--b);color:var(--bt);font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.score.big{width:84px;height:84px;font-size:32px}
+.score.sm{width:38px;height:38px;font-size:14px}
+.tier{display:inline-grid;place-items:center;min-width:22px;height:18px;padding:0 5px;border-radius:5px;font-family:var(--f-display);font-weight:600;font-size:12px;color:#fff;line-height:1;letter-spacing:.02em}
+.t-S{background:var(--ink);color:#F0C35A}
+.t-A{background:var(--liked)}
+.t-B{background:var(--tacos-ink)}
+.t-C{background:var(--pizza);color:var(--ink)}
+.t-D{background:var(--burger)}
+
+.empty{text-align:center;padding:32px 16px;background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty .big{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb, var(--cc,var(--burger)) 14%, var(--card));color:var(--cc,var(--burger))}
+.empty .big .ico{width:30px;height:30px}
+.empty p{margin:0;color:var(--ink-2);max-width:34ch;line-height:1.4}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 20px;font-weight:600;font-size:16px;background:var(--card);border:1.5px solid var(--line)}
+.btn.primary{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.btn.accent{background:var(--cc,var(--burger));color:var(--ct,#fff);border-color:transparent}
+.btn.danger{color:var(--burger-ink);border-color:#F6C2B3}
+.btn.danger.armed{background:var(--burger);color:#fff;border-color:var(--burger)}
+.btn.block{width:100%}
+.btn.sm{padding:9px 14px;font-size:14px}
+.btn:disabled{opacity:.4}
+
+/* tab bar */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);width:min(488px,calc(100% - 24px));display:grid;grid-template-columns:1fr 1fr 72px 1fr 1fr;align-items:center;background:rgba(255,253,249,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid var(--line);border-radius:24px;padding:6px;box-shadow:0 10px 30px -14px rgba(35,24,17,.35);z-index:20}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:#A8988A;font-size:11px;font-weight:700;border-radius:18px}
+.tab svg{width:22px;height:22px}
+.tab.on{color:var(--ink)}
+.tab.on svg{color:var(--burger)}
+.fab{width:56px;height:56px;margin:-22px auto 0;border-radius:50%;background:var(--ink);color:var(--cream);display:grid;place-items:center;box-shadow:0 8px 18px -6px rgba(35,24,17,.5)}
+.fab svg{width:24px;height:24px}
+
+.card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.section-title{font-family:var(--f-display);font-weight:500;font-size:18px;margin:18px 2px 8px}
+.muted{color:var(--ink-2)}
+
+/* compare */
+.pickers{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px}
+.picker{display:flex;flex-wrap:wrap;gap:6px}
+.picker.r{justify-content:flex-end}
+.pick{border-radius:50%;padding:2px;border:3px solid transparent;opacity:.55}
+.pick.on{border-color:var(--ink);opacity:1}
+.vs-badge{font-family:var(--f-display);font-weight:600;color:var(--cream);background:var(--ink);border-radius:999px;padding:4px 10px;font-size:14px}
+.match{display:flex;align-items:center;gap:14px}
+.match .pct{font-family:var(--f-display);font-weight:600;letter-spacing:-.03em;font-size:44px;line-height:1;color:var(--tacos-ink)}
+.match p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.35}
+.duo{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--card);border-radius:var(--r-md);padding:10px 12px;box-shadow:var(--shadow);text-align:left}
+.duo .scores{display:flex;align-items:center;gap:6px}
+.duo .s{display:flex;flex-direction:column;align-items:center;gap:3px}
+.diff{font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--cream-2);color:var(--ink-2);white-space:nowrap}
+.diff.agree{background:#D7F5E6;color:var(--tacos-ink)}
+.diff.far{background:#FFE0D6;color:var(--burger-ink)}
+.solo{display:flex;flex-wrap:wrap;gap:6px}
+.avs{display:flex}
+.avs .av{margin-left:-6px;border:2px solid var(--card)}
+.avs .av:first-child{margin-left:0}
+
+/* profiles */
+.pcard{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.pcard .pn{font-family:var(--f-display);font-weight:500;font-size:19px}
+.pcard .ps{font-size:13px;color:var(--ink-2);margin-top:2px}
+.pill-on{font-size:12px;font-weight:700;background:#D7F5E6;color:var(--tacos-ink);border-radius:999px;padding:4px 10px}
+.small-btn{font-size:13px;font-weight:700;border-radius:999px;padding:6px 12px;background:var(--cream-2)}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--cream-2)}
+.icon-btn svg{width:18px;height:18px}
+.sync{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.sync i{width:9px;height:9px;border-radius:50%;background:var(--sc,#BFA98F)}
+
+/* map */
+.map-wrap{position:relative;z-index:0;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);background:#EAE4D8}
+#map{height:max(380px, calc(100vh - 330px));width:100%}
+.map-btn{position:absolute;z-index:1000;right:10px;bottom:10px;background:var(--card);border-radius:999px;padding:8px 12px;font-weight:700;font-size:13px;box-shadow:var(--shadow);display:flex;gap:6px;align-items:center}
+.leaflet-container{font-family:var(--f-body)!important}
+.leaflet-container img{max-width:none!important}
+.leaflet-div-icon{background:none!important;border:0!important}
+.pin{width:44px;height:44px;border-radius:50% 50% 50% 6px;transform:rotate(-45deg);background:var(--b);border:3px solid #fff;box-shadow:0 4px 10px rgba(42,28,18,.35);display:grid;place-items:center}
+.pin span{transform:rotate(45deg);font-family:var(--f-display);font-weight:600;font-size:14px;color:var(--bt);line-height:1}
+
+.me-dot{width:18px;height:18px;border-radius:50%;background:#3A86FF;border:3px solid #fff;box-shadow:0 0 0 6px rgba(58,134,255,.25)}
+.leaflet-popup-content-wrapper{border-radius:18px!important;background:var(--card)!important}
+.leaflet-popup-tip{background:var(--card)!important}
+.leaflet-popup-content{margin:12px 14px!important;min-width:200px}
+.pop h4{font-family:var(--f-display);font-weight:500;font-size:17px;margin:0 0 2px}
+.pop .addr{font-size:12px;color:var(--ink-2);margin-bottom:8px}
+.pop-row .ico{width:18px;height:18px;color:var(--cc)}
+.pop-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line);width:100%;text-align:left;font-size:14px}
+.pop-row .grow{flex:1}
+
+/* sheets */
+#sheet{position:fixed;inset:0;z-index:2000;display:none}
+#sheet.open{display:block}
+.backdrop{position:absolute;inset:0;background:rgba(42,28,18,.45);animation:fade .2s}
+.panel{position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:min(520px,100%);max-height:92%;overflow:auto;background:var(--cream);border-radius:28px 28px 0 0;padding:10px 16px calc(env(safe-area-inset-bottom) + 20px);animation:up .25s cubic-bezier(.2,.9,.3,1.1)}
+.panel.full{top:0;max-height:none;border-radius:0;display:flex;flex-direction:column;padding:0}
+@keyframes up{from{transform:translate(-50%,40px);opacity:0}}
+@keyframes fade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 12px}
+.sheet-head{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;border-bottom:1.5px solid var(--line)}
+.sheet-head .t{text-align:center;font-family:var(--f-display);font-weight:500;font-size:18px}
+.sheet-head .steps{font-size:12px;color:var(--ink-2);text-align:right;font-weight:700}
+.sheet-body{flex:1;overflow:auto;padding:16px}
+.sheet-body > *{max-width:520px;margin-left:auto;margin-right:auto}
+.sheet-foot{padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);border-top:1.5px solid var(--line);background:var(--cream)}
+.sheet-foot > *{max-width:488px;margin:0 auto}
+
+/* form */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field > label,.lab{font-weight:700;font-size:14px}
+.opt{font-weight:700;color:var(--ink-2);font-size:12.5px}
+.input{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px}
+.input:focus{border-color:var(--ink);outline:none}
+textarea.input{min-height:84px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prefix{position:relative}
+.prefix span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink-2);font-weight:700}
+.prefix .input{padding-left:28px}
+.catgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ctile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px;border-radius:var(--r-md);background:var(--card);border:1.5px solid var(--line);font-weight:700;font-size:12px}
+.ctile .e{width:24px;height:24px;color:var(--cc)}
+.ctile.on{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.ctile:disabled{opacity:.35}
+.ctile.on:disabled{opacity:1}
+.photo{display:grid;place-items:center;gap:6px;min-height:120px;border:1.5px dashed var(--line);border-radius:var(--r-md);background:var(--card);color:var(--ink-2);font-weight:700;cursor:pointer;overflow:hidden;position:relative}
+.photo img{width:100%;max-height:240px;object-fit:cover}
+.photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.err{background:#FFE0D6;color:var(--burger-ink);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.pinned{display:flex;align-items:center;gap:10px;background:#D7F5E6;color:var(--tacos-ink);border-radius:var(--r-sm);padding:10px 12px;font-size:14px}
+.pinned span{flex:1;overflow-wrap:anywhere}
+.geo-results{display:flex;flex-direction:column;gap:6px}
+.geo-results button{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
+.geo-results b{display:block}
+.geo-results small{color:var(--ink-2);font-size:12.5px}
+
+/* bucket */
+.ask{font-family:var(--f-display);font-weight:500;font-size:24px;text-align:center;margin:8px 0 18px}
+.buckets{display:flex;flex-direction:column;gap:10px}
+.bucket{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;text-align:left;background:var(--card);border-radius:var(--r-lg);padding:14px;box-shadow:var(--shadow);border:3px solid transparent}
+.bucket:active{border-color:var(--b)}
+.bucket .face{width:52px;height:52px;border-radius:50%;background:color-mix(in srgb, var(--b) 16%, var(--card));color:var(--b);display:grid;place-items:center}
+.bucket .face .ico{width:28px;height:28px}
+.bucket .bl{font-family:var(--f-display);font-weight:500;font-size:19px}
+.bucket .br{font-size:13px;color:var(--ink-2);font-weight:700}
+
+/* versus */
+.vs-wrap{display:flex;flex-direction:column;gap:10px;position:relative}
+.vs-card{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;text-align:left;background:var(--card);border-radius:var(--r-lg);padding:12px;box-shadow:var(--shadow);border:3px solid transparent;transition:transform .12s}
+.vs-card:active{transform:scale(.97);border-color:var(--ink)}
+.vs-card .thumb{width:76px;height:76px;border-radius:16px}
+.vs-label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.vs-name{font-family:var(--f-display);font-weight:500;font-size:20px;line-height:1.15;margin-top:2px}
+.vs-mid{align-self:center;font-family:var(--f-display);font-weight:600;color:var(--cream);background:var(--ink);border-radius:999px;padding:4px 14px;margin:-4px 0;z-index:1;box-shadow:0 0 0 4px var(--cream)}
+.progress{display:flex;justify-content:center;gap:6px;margin:4px 0 14px}
+.progress i{width:28px;height:6px;border-radius:9px;background:var(--line)}
+.progress i.done{background:var(--ink)}
+.flow-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+
+.result{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:20px}
+.result .burst{position:relative;display:grid;place-items:center;width:160px;height:160px}
+.result .burst::before{content:"";position:absolute;inset:14px;border-radius:50%;border:1.5px solid color-mix(in srgb, var(--cc) 45%, transparent);box-shadow:0 0 0 14px color-mix(in srgb, var(--cc) 10%, transparent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result .tier{font-size:18px;height:28px;min-width:36px;border-radius:9px}
+
+.hero{width:100%;height:200px;object-fit:cover;border-radius:var(--r-lg)}
+.hero.emoji{display:grid;place-items:center;background:color-mix(in srgb, var(--cc) 14%, var(--card));color:var(--cc)}
+.hero.emoji .ico{width:72px;height:72px}
+.item-head{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;margin:14px 2px 6px}
+.item-head h2{font-size:26px;font-weight:500;line-height:1.1}
+.item-head .dish{color:var(--ink-2);margin-top:3px}
+.item-head .tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.score-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.rankline{background:var(--cream-2);border-radius:var(--r-md);padding:10px 12px;font-size:14px;margin:8px 0 12px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.facts div{background:var(--card);border-radius:var(--r-sm);padding:10px 12px}
+.facts div.w{grid-column:1/-1}
+.facts dt{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);font-weight:700}
+.facts dd{margin:2px 0 0;font-weight:700;overflow-wrap:anywhere}
+.notes{background:var(--card);border-radius:var(--r-md);padding:12px;margin-bottom:14px;line-height:1.45;white-space:pre-wrap}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.actions .wide{grid-column:1/-1}
+
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:36px;height:36px;border-radius:50%;background:var(--pc);border:3px solid transparent;}
+.sw.on{border-color:var(--ink)}
+.emo{width:42px;height:42px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);font-size:22px}
+.emo.on{border-color:var(--ink);background:var(--cream-2)}
+.info h3{font-size:17px;margin:14px 0 4px}
+.info p{margin:0 0 6px;line-height:1.45;color:var(--ink-2);font-size:15px}
+.ranges{display:grid;gap:6px;margin:8px 0}
+.ranges div{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--r-sm);padding:8px 10px;font-size:14px}
+.ranges b{margin-left:auto;font-variant-numeric:tabular-nums}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:700;z-index:3000;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheet"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ environment ============
+   Inside Claude the page runs in a sandboxed frame: no map tiles, address search, GPS or downloads,
+   but data syncs to the Claude account. Hosted on its own (e.g. GitHub Pages) everything works and
+   data is kept on the device. */
+const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.claude; }catch(e){ return true; } })();
+const LEAFLET_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+const LEAFLET_CSS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+
+/* ============ constants ============ */
+const CATS = [
+  {k:'burger', name:'Burgers', one:'burger', emoji:'🍔', color:'var(--burger)', text:'#fff', styles:['Smash','Pub','Diner','Gourmet','Double','Veggie']},
+  {k:'pizza',  name:'Pizza',   one:'pizza',  emoji:'🍕', color:'var(--pizza)',  text:'#2A1C12', styles:['NY','Detroit','Neapolitan','Chicago deep dish','Tavern','Sicilian','Grandma']},
+  {k:'tacos',  name:'Tacos',   one:'taco',   emoji:'🌮', color:'var(--tacos)',  text:'#fff', styles:['Al pastor','Birria','Carnitas','Asada','Fish','Chicken']},
+  {k:'wings',  name:'Wings',   one:'wing order', emoji:'🍗', color:'var(--wings)', text:'#fff', styles:['Buffalo','Dry rub','BBQ','Garlic parm','Korean','Lemon pepper']},
+  {k:'steak',  name:'Steaks',  one:'steak',  emoji:'🥩', color:'var(--steak)',  text:'#fff', styles:['Ribeye','NY strip','Filet','Porterhouse','Sirloin','Tomahawk','Skirt']},
+];
+const CAT = Object.fromEntries(CATS.map(c=>[c.k,c]));
+const BUCKETS = [
+  {k:'liked',    label:'I liked it',     emoji:'😍', lo:6.7, hi:10,  color:'var(--liked)',    text:'#fff'},
+  {k:'fine',     label:'It was fine',    emoji:'🙂', lo:3.4, hi:6.6, color:'var(--fine)',     text:'#2A1C12'},
+  {k:'disliked', label:"Didn't like it", emoji:'😕', lo:0,   hi:3.3, color:'var(--disliked)', text:'#fff'},
+];
+const BUCKET = Object.fromEntries(BUCKETS.map(b=>[b.k,b]));
+const P_COLORS = ['#DD5A3E','#E6A23C','#2F9A78','#C9527A','#6656D8','#3E7BD6','#C7772E','#7D6656'];
+const P_EMOJI = ['😋','🤠','🦊','🐸','🐻','👽','🧀','🔥','🌶️','🍟','🐙','⭐'];
+const MIN_FOR_STABLE = 5;
+const svgI = (body, sw=1.8) => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+const FOOD_ICON = {
+  burger: svgI('<path d="M4 10.5C4 7 7.6 4.5 12 4.5s8 2.5 8 6H4z"/><path d="M3 14h18"/><path d="M4.5 17.5h15l-.5 1.3a2 2 0 0 1-1.9 1.2H6.9A2 2 0 0 1 5 18.8z"/>'),
+  pizza:  svgI('<path d="M12 21 3.6 6.6a16.5 16.5 0 0 1 16.8 0z"/><path d="M5 9a13.8 13.8 0 0 1 14 0"/><circle cx="12" cy="12" r="1.1"/><circle cx="9.6" cy="15.4" r=".9"/><circle cx="14.3" cy="15" r=".9"/>'),
+  tacos:  svgI('<path d="M3 17.5a9 9 0 0 1 18 0z"/><path d="M6.5 13c1-.9 2-.9 3 0s2 .9 3 0 2-.9 3 0 1.8.8 2.3.2"/>'),
+  wings:  svgI('<circle cx="15" cy="9" r="5.5"/><path d="M11 12.9 7 16.9"/><circle cx="5.6" cy="16.6" r="1.6"/><circle cx="7.4" cy="18.4" r="1.6"/>'),
+  steak:  svgI('<path d="M5.3 8.6C5.8 5.7 8.6 4 12.2 4c4.8 0 7.8 3 7.8 7.1 0 5-3.9 8.9-8.9 8.9-3.4 0-5.9-1.9-5.9-4.7 0-1.6 1-2.6 1-3.6s-1.2-1.6-.9-3.1z"/><circle cx="14" cy="10.5" r="2"/>'),
+  all:    svgI('<path d="M7 3v18M4.5 3v5a2.5 2.5 0 0 0 5 0V3M17.5 21V3c-2.3 1.6-3 4.6-3 8.5h3"/>'),
+};
+const FACE = {
+  liked:    svgI('<circle cx="12" cy="12" r="9"/><path d="M8 13.5c1 1.6 2.4 2.4 4 2.4s3-.8 4-2.4"/><path d="M9 9.5v.5M15 9.5v.5" stroke-width="2.4"/>'),
+  fine:     svgI('<circle cx="12" cy="12" r="9"/><path d="M8.5 15h7"/><path d="M9 9.5v.5M15 9.5v.5" stroke-width="2.4"/>'),
+  disliked: svgI('<circle cx="12" cy="12" r="9"/><path d="M8 16c1-1.4 2.4-2.1 4-2.1s3 .7 4 2.1"/><path d="M9 9.5v.5M15 9.5v.5" stroke-width="2.4"/>'),
+};
+const foodIcon = k => FOOD_ICON[k] || FOOD_ICON.all;
+
+const ic = {
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  area:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V11M16 21V7M12 21V3M4 21h16"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.6 2.6 3 5.2"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  back:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+};
+
+/* ============ helpers ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const clone = o => JSON.parse(JSON.stringify(o));
+const norm = s => String(s||'').toLowerCase().replace(/^the\s+/,'').replace(/[^a-z0-9]+/g,' ').trim();
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const hasPin = it => typeof it.lat==='number' && typeof it.lng==='number';
+function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+const today = () => ymd(new Date());
+function fmtDate(s){ if(!s) return ''; const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+function tierOf(s){ return s>=9?'S':s>=8?'A':s>=6.7?'B':s>=5?'C':'D'; }
+function bucketForScore(s){ return s>=6.7?BUCKET.liked:s>=3.4?BUCKET.fine:BUCKET.disliked; }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ============ state ============ */
+let S = { profiles:[], activeId:null, orders:{}, items:{} };
+const ui = { tab:'lists', cat:'burger', style:'all', area:'',
+  areaScope:'me', areaCat:'all', areaMin:false,
+  mapScope:'me', mapCat:'all', mapFit:true, mapFocus:null,
+  crew:'board', cmpA:null, cmpB:null, cmpCat:'burger', groupCat:'burger', groupMin2:false,
+  sheet:null, flash:null };
+let flow = null;
+let persisted = false;
+let syncMode = IN_CLAUDE ? 'device' : 'local';
+
+const profile = id => S.profiles.find(p=>p.id===id);
+const activeProfile = () => profile(S.activeId) || S.profiles[0];
+function catOrder(pid,cat){
+  S.orders[pid] ??= {};
+  S.orders[pid][cat] ??= {liked:[],fine:[],disliked:[]};
+  return S.orders[pid][cat];
+}
+function hasDemo(){ return Object.values(S.items).some(i=>i.demo) || S.profiles.some(p=>p.demo); }
+
+/* ============ scoring ============
+   1. The bucket sets the score range.
+   2. Within a bucket items are spread evenly by position: score = lo + (hi-lo) * (n-i)/(n+1).
+   3. Tied items share the average of their slots. */
+function ranked(pid,cat){
+  const o = catOrder(pid,cat); const out=[];
+  for(const b of BUCKETS){
+    const ids = o[b.k].filter(id=>S.items[id]); const n=ids.length;
+    const raw = ids.map((id,i)=> b.lo + (b.hi-b.lo)*(n-i)/(n+1));
+    let i=0;
+    while(i<n){
+      let j=i; const g=S.items[ids[i]].tie;
+      if(g){ while(j+1<n && S.items[ids[j+1]].tie===g) j++; }
+      const avg = raw.slice(i,j+1).reduce((a,c)=>a+c,0)/(j-i+1);
+      for(let k=i;k<=j;k++) out.push({item:S.items[ids[k]], score:Math.round(avg*10)/10, bucket:b, tied:j>i});
+      i=j+1;
+    }
+  }
+  out.forEach((r,idx)=>{
+    const prev=out[idx-1];
+    r.rank = (prev && r.tied && prev.tied && prev.item.tie===r.item.tie) ? prev.rank : idx+1;
+    r.tier = tierOf(r.score);
+  });
+  return out;
+}
+function rankedMany(pids, cats){ const out=[]; pids.forEach(pid=>cats.forEach(c=>ranked(pid,c).forEach(r=>out.push({...r, pid})))); return out; }
+function keyedRanks(pid,cat){
+  const rows=ranked(pid,cat); const per={};
+  rows.forEach(r=>{ const k=norm(r.item.place); per[k]=(per[k]||0)+1; });
+  const m=new Map();
+  rows.forEach(r=>{ const pk=norm(r.item.place); const k=per[pk]>1? pk+'|'+norm(r.item.dish) : pk; if(!m.has(k)) m.set(k,r); });
+  return m;
+}
+function removeFromOrder(item){
+  const o=catOrder(item.profileId,item.cat);
+  for(const b of BUCKETS) o[b.k]=o[b.k].filter(id=>id!==item.id && S.items[id]);
+  const changed=[];
+  if(item.tie){
+    const g=item.tie; item.tie=null;
+    const left=Object.values(S.items).filter(i=>i.id!==item.id && i.tie===g);
+    if(left.length===1){ left[0].tie=null; changed.push(left[0].id); }
+  }
+  return changed;
+}
+// Areas: the Location field, matched case-insensitively.
+function areaNames(items){ const m=new Map(); items.forEach(it=>{ const k=norm(it.location); if(k && !m.has(k)) m.set(k, it.location.trim()); }); return m; }
+
+/* ============ storage ============
+   Device: IndexedDB (room for photos), falling back to localStorage.
+   Claude: the same, plus each item synced to the viewer's private space in the Claude account. */
+const LS_KEY='tummi_v1';
+function metaObj(){ return {v:2, profiles:S.profiles, activeId:S.activeId, orders:S.orders}; }
+const idb={
+  db:null,
+  open(){ return new Promise((res,rej)=>{ if(!window.indexedDB) return rej(new Error('no idb')); const r=indexedDB.open('tummi',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(this.db=r.result); r.onerror=()=>rej(r.error); }); },
+  async get(k){ const db=this.db||await this.open(); return new Promise((res,rej)=>{ const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); },
+  async set(k,v){ const db=this.db||await this.open(); return new Promise((res,rej)=>{ const t=db.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); },
+};
+let saveTimer=null;
+function saveLocal(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async ()=>{
+    const snap={meta:clone(metaObj()), items:clone(S.items)};
+    try{ await idb.set('state', snap); try{ localStorage.removeItem(LS_KEY); }catch(_){} return; }catch(e){}
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(snap)); }
+    catch(e){ try{ const lite={}; for(const [k,v] of Object.entries(snap.items)) lite[k]={...v, photo:null}; localStorage.setItem(LS_KEY, JSON.stringify({meta:snap.meta, items:lite})); toast('Storage is full, so photos were not saved.'); }catch(_){} }
+  },150);
+}
+async function loadLocal(){
+  let d=null;
+  try{ d=await idb.get('state'); }catch(e){}
+  if(!d){ try{ const raw=localStorage.getItem(LS_KEY); if(raw) d=JSON.parse(raw); }catch(e){} }
+  if(!d || !d.meta || !d.meta.profiles?.length) return false;
+  applySnapshot(d); return true;
+}
+function applySnapshot(d){ S={profiles:d.meta.profiles, activeId:d.meta.activeId, orders:d.meta.orders||{}, items:d.items||{}}; }
+
+let remote=null; const queues={}; let metaTimer=null;
+function enqueue(key, fn){
+  const run=()=>fn().catch(async e=>{ if(e && e.code==='unavailable'){ await sleep(400+Math.random()*800); return fn(); } throw e; });
+  queues[key]=(queues[key]||Promise.resolve()).then(run).catch(onRemoteError);
+}
+function onRemoteError(e){
+  const c=e && e.code;
+  if(c==='quota_exceeded'){ toast('Your Tummi storage is full. Delete a few photos or items.'); return; }
+  if(['invalid_argument','revoked','not_granted','capability_disabled','capability_removed'].includes(c)){
+    remote=null; syncMode='device'; render(); toast("Couldn't save to your account. Saving on this device only."); return;
+  }
+  toast('Sync hiccup. Your changes are saved on this device.');
+}
+function commit({items=[], del=[]}={}){
+  if(!persisted){ persisted=true; items=Object.keys(S.items); try{ navigator.storage?.persist?.(); }catch(_){} }
+  saveLocal();
+  if(!remote) return;
+  items.forEach(id=>{ const it=S.items[id]; if(it) enqueue('item_'+id, ()=>remote.col.doc('item_'+id).set(clone(it))); });
+  del.forEach(id=>enqueue('item_'+id, ()=>remote.col.doc('item_'+id).delete()));
+  clearTimeout(metaTimer);
+  metaTimer=setTimeout(()=>enqueue('meta', ()=>remote.col.doc('meta').set(clone(metaObj()))), 350);
+}
+async function connectRemote(){
+  if(!IN_CLAUDE || typeof claude==='undefined' || !claude.use) return;
+  syncMode='connecting'; render();
+  try{
+    const [db,user]=await Promise.all([claude.use('db'), claude.use('user')]);
+    if(!db || !user){ syncMode='device'; render(); return; }
+    const id=await user.id();
+    if(!id){ syncMode='device'; render(); return; }
+    const col=db.collection('data/users/'+id);
+    const timer=setTimeout(()=>{ if(syncMode==='connecting'){ syncMode='device'; render(); toast("Can't reach your account yet. Saving on this device."); } },10000);
+    const snap=await col.limit(1000).get();
+    clearTimeout(timer);
+    let meta=null; const items={};
+    snap.docs.forEach(d=>{ const v=d.data(); if(d.id==='meta') meta=v; else if(d.id.startsWith('item_') && v && v.id) items[v.id]=clone(v); });
+    remote={col}; syncMode='cloud';
+    if(meta && meta.profiles?.length){ applySnapshot({meta:clone(meta), items}); persisted=true; saveLocal(); }
+    else if(persisted){ commit({items:Object.keys(S.items)}); }
+    render();
+  }catch(e){ syncMode='device'; render(); }
+}
+
+/* ============ backup (hosted version) ============ */
+function exportBackup(){
+  const blob=new Blob([JSON.stringify({app:'tummi', exported:new Date().toISOString(), meta:metaObj(), items:S.items})],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`tummi-backup-${today()}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+}
+async function importBackup(file){
+  try{ const d=JSON.parse(await file.text()); if(d.app!=='tummi' || !d.meta?.profiles?.length) throw 0;
+    applySnapshot(d); persisted=false; commit(); render(); toast('Backup restored');
+  }catch(e){ toast("That file isn't a Tummi backup."); }
+}
+
+/* ============ demo data ============ */
+function buildDemo(){
+  const me = activeProfile();
+  const jess={id:'p_jess', name:'Jess', color:'#C9527A', demo:true};
+  const marco={id:'p_marco', name:'Marco', color:'#3E7BD6', demo:true};
+  [jess,marco].forEach(p=>{ if(!profile(p.id)) S.profiles.push(p); });
+  const T={ 'Ann Arbor':[42.2808,-83.7430], 'Ferndale':[42.4606,-83.1346], 'Detroit':[42.3314,-83.0458], 'Royal Oak':[42.4895,-83.1446], 'Grand Rapids':[42.9634,-85.6681], 'Ypsilanti':[42.2411,-83.6130] };
+  // [style, town, offset lat, offset lng]
+  const P={
+    'Smash Shack':['Smash','Ferndale',.004,-.003], 'Big Bun Diner':['Diner','Royal Oak',-.003,.004], "Sully's Pub":['Pub','Detroit',.006,.008], 'Patty Wagon':['Double','Ann Arbor',.003,.006],
+    'Griddle House':['Smash','Ann Arbor',-.004,-.005], 'Burger Barn':['Gourmet','Ypsilanti',.002,.003],
+    'Square Deal Pies':['Detroit','Detroit',-.005,-.006], "Nonna's Oven":['Neapolitan','Ferndale',-.003,.005], 'Slice Bros':['NY','Ann Arbor',.006,-.002], 'Tavern on 5th':['Tavern','Royal Oak',.004,-.004],
+    'Crust & Co.':['Sicilian','Grand Rapids',.003,.004], 'Pie Hole':['NY','Ypsilanti',-.003,-.004],
+    'Taqueria El Sol':['Al pastor','Detroit',-.002,-.03], 'Birria Boyz':['Birria','Detroit',.008,-.025], 'Casa Verde':['Carnitas','Grand Rapids',-.004,-.003], 'Taco Tuesday Truck':['Asada','Ann Arbor',.001,.009],
+    'Flap Shack':['Buffalo','Royal Oak',.001,.002], 'Hot Coop':['Korean','Ann Arbor',-.006,.003], 'Bonfire Wings':['Dry rub','Ferndale',.006,.002], 'Saucy Bird':['Garlic parm','Grand Rapids',.005,-.006],
+    'Ember Chophouse':['Ribeye','Detroit',.003,.002], 'Prime & Pine':['Filet','Grand Rapids',-.002,.006], 'Cattle Call':['NY strip','Royal Oak',-.005,.001],
+  };
+  const plan={
+    [me.id]:{burger:{liked:['Smash Shack','Patty Wagon','Griddle House'],fine:['Big Bun Diner',"Sully's Pub"],disliked:['Burger Barn']},
+             pizza:{liked:['Square Deal Pies',"Nonna's Oven",'Slice Bros'],fine:['Pie Hole','Tavern on 5th'],disliked:['Crust & Co.']},
+             tacos:{liked:['Birria Boyz','Taqueria El Sol'],fine:['Casa Verde']},
+             wings:{liked:['Hot Coop'],fine:['Flap Shack','Bonfire Wings']},
+             steak:{liked:['Ember Chophouse','Prime & Pine'],fine:['Cattle Call']}},
+    p_jess:{burger:{liked:['Griddle House','Smash Shack'],fine:['Patty Wagon','Burger Barn'],disliked:["Sully's Pub"]},
+            pizza:{liked:["Nonna's Oven",'Slice Bros'],fine:['Square Deal Pies'],disliked:['Pie Hole']},
+            tacos:{liked:['Taqueria El Sol','Casa Verde']},
+            wings:{liked:['Saucy Bird','Hot Coop']},
+            steak:{liked:['Prime & Pine'],fine:['Ember Chophouse']}},
+    p_marco:{burger:{liked:['Smash Shack','Big Bun Diner','Patty Wagon'],fine:['Griddle House']},
+             pizza:{liked:['Square Deal Pies','Tavern on 5th','Slice Bros'],fine:["Nonna's Oven"]},
+             tacos:{liked:['Birria Boyz'],fine:['Taqueria El Sol','Taco Tuesday Truck']},
+             wings:{liked:['Flap Shack','Bonfire Wings'],disliked:['Saucy Bird']},
+             steak:{liked:['Cattle Call','Ember Chophouse']}},
+  };
+  const prices={burger:[9,16],pizza:[14,26],tacos:[3,6],wings:[11,18],steak:[32,68]};
+  let n=0;
+  for(const [pid,cats] of Object.entries(plan)){
+    for(const [cat,bks] of Object.entries(cats)){
+      const o=catOrder(pid,cat);
+      for(const [bk,places] of Object.entries(bks)){
+        places.forEach(place=>{
+          n++; const id='demo'+n; const [a,b]=prices[cat]; const [style,town,dl,dg]=P[place]; const [tl,tg]=T[town];
+          S.items[id]={id, profileId:pid, cat, place, dish:'', style, photo:null,
+            price:String(a+((n*7)%(b-a+1))), date:ymd(new Date(Date.now()-n*86400000*3)),
+            location:town, lat:+(tl+dl).toFixed(5), lng:+(tg+dg).toFixed(5), address:town+', MI',
+            withIds:[], withText:'', notes:'', tie:null, demo:true, createdAt:Date.now()-n};
+          o[bk].push(id);
+        });
+      }
+    }
+  }
+  const mePizza=catOrder(me.id,'pizza').liked; if(mePizza.length>1){ S.items[mePizza[0]].tie='tdemo'; S.items[mePizza[1]].tie='tdemo'; }
+  const meBurger=catOrder(me.id,'burger').liked[0]; if(meBurger){ Object.assign(S.items[meBurger],{dish:'Double smash w/ grilled onions', notes:'Crispy lace edges. Get extra pickles.', withIds:['p_jess']}); }
+}
+function clearDemo(){
+  const del=Object.values(S.items).filter(i=>i.demo).map(i=>i.id);
+  del.forEach(id=>delete S.items[id]);
+  const keep=new Set(Object.values(S.items).map(i=>i.profileId));
+  const gone=S.profiles.filter(p=>p.demo && !keep.has(p.id)).map(p=>p.id);
+  S.profiles=S.profiles.filter(p=>!gone.includes(p.id));
+  gone.forEach(pid=>delete S.orders[pid]);
+  for(const pid in S.orders) for(const cat in S.orders[pid]) for(const b of BUCKETS) S.orders[pid][cat][b.k]=S.orders[pid][cat][b.k].filter(id=>S.items[id]);
+  for(const it of Object.values(S.items)) if(it.tie==='tdemo') it.tie=null;
+  if(!profile(S.activeId)) S.activeId=S.profiles[0].id;
+  ui.area=''; ui.mapFit=true;
+  commit({del}); toast('Samples cleared');
+}
+
+/* ============ components ============ */
+function avatar(p,size=30){ if(!p) return ''; return `<span class="av" style="--pc:${p.color};width:${size}px;height:${size}px;font-size:${Math.round(size*.4)}px">${esc((p.name||'?').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</span>`; }
+function scoreBubble(score,bucket,size=''){ return `<div class="score ${size}" style="--b:${bucket.color};--bt:${bucket.text}">${score.toFixed(1)}</div>`; }
+function tierBadge(t){ return `<span class="tier t-${t}" aria-label="Tier ${t}">${t}</span>`; }
+function thumb(it){ const c=CAT[it.cat]; return `<div class="thumb" style="--cc:${c.color}">${it.photo?`<img src="${it.photo}" alt="">`:foodIcon(it.cat)}</div>`; }
+function catTag(c){ return `<span class="tag" style="--cc:${c.color}">${foodIcon(c.k)}${c.name}</span>`; }
+function catTabs(current, action, counts, withAll){
+  const all = withAll? `<button class="cat ${current==='all'?'on':''}" style="--cc:var(--ink);--ct:var(--cream)" data-a="${action}" data-cat="all"><span class="e" style="--cc:currentColor">${FOOD_ICON.all}</span>All foods</button>` : '';
+  return `<div class="cats" role="tablist">${all}${CATS.map(c=>`<button class="cat ${c.k===current?'on':''}" role="tab" aria-selected="${c.k===current}" style="--cc:${c.color};--ct:${c.text}" data-a="${action}" data-cat="${c.k}"><span class="e">${foodIcon(c.k)}</span>${c.name}${counts?`<span class="n num">${counts[c.k]||0}</span>`:''}</button>`).join('')}</div>`;
+}
+function scopeSeg(current, action){
+  return `<div class="seg"><button class="${current==='me'?'on':''}" data-a="${action}" data-v="me">${esc(activeProfile().name)}</button><button class="${current==='all'?'on':''}" data-a="${action}" data-v="all">Everyone</button></div>`;
+}
+function header(){
+  const p=activeProfile();
+  return `<header class="top"><h1 class="wordmark" aria-label="tummi">tummi<i>.</i></h1>
+    <button class="me" data-a="switcher" aria-label="Switch profile">${avatar(p,30)}<span>${esc(p.name)}</span>${ic.chev}</button></header>
+    ${hasDemo()?`<div class="banner"><p>These are sample rankings so you can try things out. Your own rankings stay when you clear them.</p><button data-a="clear-demo">Clear samples</button></div>`:''}`;
+}
+function tabbar(){
+  const t=(k,label,icon)=>`<button class="tab ${ui.tab===k?'on':''}" data-a="tab" data-tab="${k}" aria-current="${ui.tab===k}">${icon}<span>${label}</span></button>`;
+  return `<nav class="tabbar" aria-label="Main">${t('lists','Lists',ic.list)}${t('map','Map',ic.map)}<button class="fab" data-a="add" aria-label="Rank something">${ic.plus}</button>${t('areas','Areas',ic.area)}${t('crew','Crew',ic.user)}</nav>`;
+}
+function row(r){
+  const it=r.item; const c=CAT[it.cat];
+  return `<button class="row ${ui.flash===it.id?'flash':''}" style="--bc:${r.bucket.color};--cc:${c.color}" data-a="open-item" data-id="${it.id}">
+    <div class="rank num">${r.rank}</div>${thumb(it)}
+    <div class="meta"><div class="name">${esc(it.place)}</div>
+      <div class="sub">${it.dish?`<span>${esc(it.dish)}</span>`:''}${it.style?`<span class="tag">${esc(it.style)}</span>`:''}${r.tied?'<span class="tag">tie</span>':''}${it.location?`<span>${esc(it.location)}</span>`:''}</div></div>
+    <div class="right">${scoreBubble(r.score,r.bucket)}${tierBadge(r.tier)}</div></button>`;
+}
+
+/* ============ views ============ */
+function viewLists(){
+  const p=activeProfile(); const c=CAT[ui.cat];
+  const rows=ranked(p.id,c.k);
+  const counts=Object.fromEntries(CATS.map(x=>[x.k, ranked(p.id,x.k).length]));
+  const areas=areaNames(rows.map(r=>r.item));
+  if(ui.area && !areas.has(ui.area)){ const all=areaNames(Object.values(S.items)); if(all.has(ui.area)) areas.set(ui.area, all.get(ui.area)); else ui.area=''; }
+  let shown = ui.area ? rows.filter(r=>norm(r.item.location)===ui.area) : rows;
+  const styles=[...new Set(shown.map(r=>r.item.style).filter(Boolean))];
+  if(ui.style!=='all' && !styles.includes(ui.style)) ui.style='all';
+  if(ui.style!=='all') shown=shown.filter(r=>r.item.style===ui.style);
+  const anyData=Object.keys(S.items).length>0;
+  const areaSel = areas.size ? `<label class="select ${ui.area?'on':''}" for="area-filter"><span aria-hidden="true" style="width:16px;height:16px;display:grid;color:var(--burger)">${ic.map}</span><select id="area-filter" data-change="area" aria-label="Filter by area"><option value="">All areas</option>${[...areas].sort((a,b)=>a[1].localeCompare(b[1])).map(([k,v])=>`<option value="${esc(k)}" ${k===ui.area?'selected':''}>${esc(v)}</option>`).join('')}</select>${ic.chev}</label>` : '';
+  return `${catTabs(ui.cat,'set-cat',counts)}
+    <div class="list-head"><h2>${esc(p.name)}'s ${c.name.toLowerCase()}</h2><span class="sub num">${rows.length} ranked</span></div>
+    ${areaSel||styles.length>1?`<div class="filters">${areaSel}${ui.area?'<button class="small-btn" data-a="clear-area">Clear</button>':''}</div>`:''}
+    ${styles.length>1?`<div class="chips" aria-label="Filter by style"><button class="chip ${ui.style==='all'?'on':''}" data-a="style" data-v="all">All styles</button>${styles.map(s=>`<button class="chip ${ui.style===s?'on':''}" data-a="style" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>`:''}
+    ${rows.length && rows.length<MIN_FOR_STABLE?`<div class="note"><span class="dot"></span><span><b>Still calibrating.</b> Scores settle once you've ranked ${MIN_FOR_STABLE} ${c.name.toLowerCase()}. With only a few, everything sits near the middle of its range.</span></div>`:''}
+    ${ui.area && rows.length?`<p class="muted" style="font-size:13px;margin:-2px 4px 10px">Ranks are out of all ${rows.length} of ${esc(p.name)}'s ${c.name.toLowerCase()}, not just ${esc(areas.get(ui.area))}.</p>`:''}
+    ${shown.length?`<div class="list">${shown.map(row).join('')}</div>`:
+      rows.length?`<div class="empty" style="--cc:${c.color}"><div class="big">${foodIcon(c.k)}</div><h3>None in ${esc(areas.get(ui.area)||'this area')}</h3><p>${esc(p.name)} hasn't ranked ${c.name.toLowerCase()} here yet.</p><button class="btn" data-a="clear-area">Show all areas</button></div>`:
+      `<div class="empty" style="--cc:${c.color}"><div class="big">${foodIcon(c.k)}</div><h3>No ${c.name.toLowerCase()} yet</h3><p>Log one and Tummi will slot it in with a few quick head-to-heads.</p>
+       <button class="btn accent" style="--cc:${c.color};--ct:${c.text}" data-a="add" data-cat="${c.k}">Rank a ${c.one}</button>
+       ${!anyData?'<button class="btn" data-a="demo">Load sample data</button>':''}</div>`}`;
+}
+
+/* Areas: average score of everything ranked in each area. */
+function viewAreas(){
+  const p=activeProfile();
+  const pids= ui.areaScope==='me'? [p.id] : S.profiles.map(x=>x.id);
+  const cats= ui.areaCat==='all'? CATS.map(c=>c.k) : [ui.areaCat];
+  const rows=rankedMany(pids,cats);
+  const noLoc=rows.filter(r=>!norm(r.item.location)).length;
+  const names=areaNames(rows.map(r=>r.item));
+  const groups=new Map();
+  rows.forEach(r=>{ const k=norm(r.item.location); if(!k) return; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(r); });
+  let areas=[...groups].map(([k,rs])=>{
+    const avg=rs.reduce((s,r)=>s+r.score,0)/rs.length;
+    const best=rs.reduce((m,r)=>r.score>m.score?r:m);
+    const spots=new Set(rs.map(r=>norm(r.item.place))).size;
+    const per=CATS.map(c=>[c, rs.filter(r=>r.item.cat===c.k).length]).filter(x=>x[1]);
+    return {k, name:names.get(k), avg:Math.round(avg*10)/10, n:rs.length, spots, best, per};
+  });
+  if(ui.areaMin) areas=areas.filter(a=>a.n>=3);
+  areas.sort((a,b)=>b.avg-a.avg || b.n-a.n);
+  return `${scopeSeg(ui.areaScope,'area-scope')}${catTabs(ui.areaCat,'area-cat',null,true)}
+    <div class="list-head"><h2>Best areas</h2><span class="sub num">${groups.size} ${groups.size===1?'area':'areas'}</span></div>
+    <div class="chips"><button class="chip ${!ui.areaMin?'on':''}" data-a="area-min" data-v="0">All areas</button><button class="chip ${ui.areaMin?'on':''}" data-a="area-min" data-v="1">3+ rankings</button></div>
+    ${areas.length?`<div class="list">${areas.map((a,i)=>{ const b=bucketForScore(a.avg);
+      return `<button class="row area" style="--bc:${b.color}" data-a="open-area" data-k="${esc(a.k)}"><div class="rank num">${i+1}</div>
+        <div class="meta"><div class="name">${esc(a.name)}</div>
+          <div class="sub"><span class="num">${a.spots} ${a.spots===1?'spot':'spots'} · ${a.n} ${a.n===1?'ranking':'rankings'}</span><span>${a.per.map(([c,n])=>`${c.name} ${n}`).join(' · ')}</span></div>
+          <div class="sub">Best: ${esc(a.best.item.place)} (${CAT[a.best.item.cat].one}) <b class="num">${a.best.score.toFixed(1)}</b></div></div>
+        <div class="right">${scoreBubble(a.avg,b)}${tierBadge(tierOf(a.avg))}</div></button>`; }).join('')}</div>`
+      :`<div class="empty"><div class="big">${ic.map}</div><h3>No areas yet</h3><p>Fill in Location when you rank something and areas will show up here.</p></div>`}
+    <p class="muted" style="font-size:13px;margin:14px 4px;line-height:1.4">An area's score is the average of every ranking there. Areas come from the Location field, so keep names consistent (Royal Oak, not RO).${noLoc?` ${noLoc} ${noLoc===1?'ranking has':'rankings have'} no location yet.`:''}</p>`;
+}
+
+/* Map */
+let lmap=null, leafletP=null, meMarker=null;
+function loadLeaflet(){
+  if(window.L) return Promise.resolve();
+  if(!leafletP) leafletP=new Promise((res,rej)=>{
+    const l=document.createElement('link'); l.rel='stylesheet'; l.href=LEAFLET_CSS; document.head.appendChild(l);
+    const s=document.createElement('script'); s.src=LEAFLET_JS; s.onload=res; s.onerror=()=>{ leafletP=null; rej(); }; document.head.appendChild(s);
+  });
+  return leafletP;
+}
+function mapGroups(){
+  const p=activeProfile();
+  const pids= ui.mapScope==='me'? [p.id] : S.profiles.map(x=>x.id);
+  const cats= ui.mapCat==='all'? CATS.map(c=>c.k) : [ui.mapCat];
+  const rows=rankedMany(pids,cats);
+  const g=new Map(); let unpinned=0;
+  rows.forEach(r=>{ const it=r.item; if(!hasPin(it)){ unpinned++; return; }
+    const k=norm(it.place)+'@'+it.lat.toFixed(3)+','+it.lng.toFixed(3);
+    if(!g.has(k)) g.set(k,{place:it.place, address:it.address||it.location||'', lat:it.lat, lng:it.lng, rows:[]});
+    g.get(k).rows.push(r); });
+  const groups=[...g.values()].map(x=>{ const avg=x.rows.reduce((s,r)=>s+r.score,0)/x.rows.length; const cats=[...new Set(x.rows.map(r=>r.item.cat))];
+    return {...x, score:Math.round((ui.mapScope==='me'? Math.max(...x.rows.map(r=>r.score)) : avg)*10)/10, cats}; });
+  return {groups, unpinned};
+}
+function viewMap(){
+  const {groups, unpinned}=mapGroups();
+  const top = `${scopeSeg(ui.mapScope,'map-scope')}${catTabs(ui.mapCat,'map-cat',null,true)}`;
+  if(IN_CLAUDE){
+    return `${top}<div class="card stack"><h3>The street map runs on your hosted copy</h3><p class="muted" style="margin:0;line-height:1.45">Inside Claude, map tiles, address search and GPS are blocked. Open Tummi from GitHub Pages to see every spot on a zoomable map. Here's what would be pinned:</p></div>
+      <div class="list" style="margin-top:12px">${groups.sort((a,b)=>b.score-a.score).map((g,i)=>{ const b=bucketForScore(g.score); return `<div class="row area" style="--bc:${b.color}"><div class="rank num">${i+1}</div><div class="meta"><div class="name">${esc(g.place)}</div><div class="sub">${esc(g.address)}</div></div><div class="right">${scoreBubble(g.score,b,'sm')}</div></div>`; }).join('')}</div>`;
+  }
+  return `${top}<div class="map-wrap"><div id="map" role="application" aria-label="Map of ranked spots"></div><button class="map-btn" data-a="locate">${ic.map.replace('<svg','<svg width="16" height="16"')} Near me</button></div>
+    <p class="muted" style="font-size:13px;margin:10px 4px;line-height:1.4">${groups.length} ${groups.length===1?'spot':'spots'} on the map. Pins show ${ui.mapScope==='me'?'your best score at each place':"everyone's average"}.${unpinned?` ${unpinned} ${unpinned===1?'ranking isn\'t':'rankings aren\'t'} pinned yet; open one and tap Edit details to add a pin.`:''}</p>`;
+}
+function popupHTML(g){
+  const multi=ui.mapScope==='all';
+  return `<div class="pop"><h4>${esc(g.place)}</h4><div class="addr">${esc(g.address)}</div>
+    ${g.rows.sort((a,b)=>b.score-a.score).map(r=>`<button class="pop-row" data-a="open-item" data-id="${r.item.id}" style="--cc:${CAT[r.item.cat].color}">${foodIcon(r.item.cat)}${multi?avatar(profile(r.pid),20):''}<span class="grow">${esc(r.item.dish||CAT[r.item.cat].name)}<br><small class="muted">#${r.rank} of ${ranked(r.pid,r.item.cat).length}${multi?' for '+esc(profile(r.pid).name):''}</small></span>${scoreBubble(r.score,r.bucket,'sm')}</button>`).join('')}</div>`;
+}
+async function mountMap(){
+  const el=$('#map'); if(!el) return;
+  try{ await loadLeaflet(); }catch(e){ el.innerHTML='<div class="empty" style="height:100%;justify-content:center"><h3>Map didn\'t load</h3><p>Check your connection and open the Map tab again.</p></div>'; return; }
+  if(!document.body.contains(el)) return;
+  const prev = lmap ? {c:lmap.getCenter(), z:lmap.getZoom()} : null;
+  if(lmap){ lmap.remove(); lmap=null; }
+  lmap=L.map(el,{zoomControl:true, attributionControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19, subdomains:'abcd',
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'}).addTo(lmap);
+  const {groups}=mapGroups(); const markers=[];
+  groups.forEach(g=>{
+    const b=bucketForScore(g.score);
+    const icon=L.divIcon({className:'', iconSize:[44,44], iconAnchor:[6,44], popupAnchor:[16,-40],
+      html:`<div class="pin" style="--b:${b.color};--bt:${b.text}"><span>${g.score.toFixed(1)}</span></div>`});
+    const m=L.marker([g.lat,g.lng],{icon, title:g.place, riseOnHover:true}).addTo(lmap).bindPopup(()=>popupHTML(g),{maxWidth:280});
+    m._ids=g.rows.map(r=>r.item.id); markers.push(m);
+  });
+  if(ui.mapFocus){
+    const m=markers.find(x=>x._ids.includes(ui.mapFocus)); ui.mapFocus=null; ui.mapFit=false;
+    if(m){ lmap.setView(m.getLatLng(),15); setTimeout(()=>m.openPopup(),250); return; }
+  }
+  if(ui.mapFit || !prev){
+    ui.mapFit=false;
+    if(markers.length>1) lmap.fitBounds(L.featureGroup(markers).getBounds().pad(0.15),{maxZoom:14});
+    else if(markers.length===1) lmap.setView(markers[0].getLatLng(),14);
+    else lmap.setView([42.73,-84.55],7); // Michigan
+  } else lmap.setView(prev.c, prev.z);
+  if(meMarker){ meMarker.addTo(lmap); }
+}
+function locateMe(){
+  if(!navigator.geolocation){ toast('Location isn\'t available in this browser.'); return; }
+  toast('Finding you…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const ll=[pos.coords.latitude,pos.coords.longitude];
+    if(window.L && lmap){ if(meMarker) meMarker.remove(); meMarker=L.marker(ll,{icon:L.divIcon({className:'',iconSize:[18,18],html:'<div class="me-dot"></div>'}), interactive:false}).addTo(lmap); lmap.setView(ll,14); }
+  }, ()=>toast('Location permission was denied. Turn it on in your browser settings.'), {enableHighAccuracy:true, timeout:10000, maximumAge:60000});
+}
+
+function viewCrew(){
+  const seg=`<div class="seg">${[['board','Leaderboard'],['compare','Compare'],['profiles','Profiles']].map(([k,l])=>`<button class="${ui.crew===k?'on':''}" data-a="crew" data-v="${k}">${l}</button>`).join('')}</div>`;
+  return seg + ({board:viewGroup, compare:viewCompare, profiles:viewProfiles}[ui.crew])();
+}
+function viewCompare(){
+  if(S.profiles.length<2) return `<div class="empty"><div class="big">${ic.user}</div><h3>Add a friend to compare</h3><p>Make a profile for a friend, rank a few spots for them, then see where your tastes line up.</p><button class="btn primary" data-a="new-profile">Add a friend</button></div>`;
+  if(!profile(ui.cmpA)) ui.cmpA=S.activeId;
+  if(!profile(ui.cmpB) || ui.cmpB===ui.cmpA) ui.cmpB=(S.profiles.find(p=>p.id!==ui.cmpA)||{}).id;
+  const A=profile(ui.cmpA), B=profile(ui.cmpB); const c=CAT[ui.cmpCat];
+  const ma=keyedRanks(A.id,c.k), mb=keyedRanks(B.id,c.k);
+  const both=[...ma.keys()].filter(k=>mb.has(k)).map(k=>({a:ma.get(k), b:mb.get(k)}));
+  const onlyA=[...ma.keys()].filter(k=>!mb.has(k)).map(k=>ma.get(k));
+  const onlyB=[...mb.keys()].filter(k=>!ma.has(k)).map(k=>mb.get(k));
+  both.sort((x,y)=>(y.a.score+y.b.score)-(x.a.score+x.b.score));
+  const avgDiff= both.length? both.reduce((s,x)=>s+Math.abs(x.a.score-x.b.score),0)/both.length : 0;
+  const pct= Math.max(0,Math.min(100,Math.round(100-avgDiff*10)));
+  const picker=(sel,action,side)=>`<div class="picker ${side}">${S.profiles.map(p=>`<button class="pick ${p.id===sel?'on':''}" data-a="${action}" data-id="${p.id}" aria-label="${esc(p.name)}" aria-pressed="${p.id===sel}">${avatar(p,34)}</button>`).join('')}</div>`;
+  const big=both.length? both.reduce((m,x)=>Math.abs(x.a.score-x.b.score)>Math.abs(m.a.score-m.b.score)?x:m) : null;
+  return `<div class="pickers">${picker(A.id,'cmp-a','')}<span class="vs-badge">vs</span>${picker(B.id,'cmp-b','r')}</div>
+    ${catTabs(ui.cmpCat,'cmp-cat')}
+    <div class="card match">${both.length?`<div class="pct num">${pct}%</div><p><b>${esc(A.name)}</b> and <b>${esc(B.name)}</b> are a ${pct}% taste match on ${both.length} shared ${both.length===1?'spot':'spots'}.${big&&Math.abs(big.a.score-big.b.score)>=1.5?` Biggest split: <b>${esc(big.a.item.place)}</b>.`:''}</p>`
+      :`<div class="pct">–</div><p>No ${c.name.toLowerCase()} spots in common yet. Rank the same place to compare.</p>`}</div>
+    ${both.length?`<h3 class="section-title">Both tried</h3><div class="stack">${both.map(x=>{
+      const d=Math.round((x.a.score-x.b.score)*10)/10; const ad=Math.abs(d);
+      const cls= ad<0.8?'agree':ad>=2.5?'far':'';
+      const label= ad<0.8?'Agree': `${esc((d>0?A:B).name)} +${ad.toFixed(1)}`;
+      return `<button class="duo" data-a="open-item" data-id="${x.a.item.id}"><div class="meta"><div class="name">${esc(x.a.item.place)}</div><div class="sub"><span class="diff ${cls}">${label}</span></div></div>
+        <div class="scores"><div class="s">${scoreBubble(x.a.score,x.a.bucket,'sm')}${avatar(A,18)}</div><div class="s">${scoreBubble(x.b.score,x.b.bucket,'sm')}${avatar(B,18)}</div></div></button>`; }).join('')}</div>`:''}
+    ${onlyA.length?`<h3 class="section-title">Only ${esc(A.name)}</h3><div class="solo">${onlyA.map(r=>`<span class="chip">${esc(r.item.place)} · ${r.score.toFixed(1)}</span>`).join('')}</div>`:''}
+    ${onlyB.length?`<h3 class="section-title">Only ${esc(B.name)}</h3><div class="solo">${onlyB.map(r=>`<span class="chip">${esc(r.item.place)} · ${r.score.toFixed(1)}</span>`).join('')}</div>`:''}`;
+}
+function viewGroup(){
+  const c=CAT[ui.groupCat]; const agg=new Map();
+  S.profiles.forEach(p=>{ keyedRanks(p.id,c.k).forEach((r,k)=>{
+    if(!agg.has(k)) agg.set(k,{k, place:r.item.place, location:r.item.location, photo:null, entries:[]});
+    const a=agg.get(k); a.entries.push({p, r}); if(!a.photo && r.item.photo) a.photo=r.item.photo;
+  }); });
+  let rows=[...agg.values()].map(a=>{ const sc=a.entries.map(e=>e.r.score); const avg=sc.reduce((s,v)=>s+v,0)/sc.length;
+    return {...a, avg:Math.round(avg*10)/10, lo:Math.min(...sc), hi:Math.max(...sc)}; });
+  if(ui.groupMin2) rows=rows.filter(r=>r.entries.length>=2);
+  rows.sort((x,y)=> y.avg-x.avg || y.entries.length-x.entries.length);
+  return `${catTabs(ui.groupCat,'group-cat')}
+    <div class="list-head"><h2>Group ${c.name.toLowerCase()}</h2><span class="sub">${S.profiles.length} ${S.profiles.length===1?'profile':'profiles'}</span></div>
+    <div class="chips"><button class="chip ${!ui.groupMin2?'on':''}" data-a="gmin" data-v="0">Everything</button><button class="chip ${ui.groupMin2?'on':''}" data-a="gmin" data-v="1">2+ people tried</button></div>
+    ${rows.length?`<div class="list">${rows.map((r,i)=>{ const b=bucketForScore(r.avg);
+      return `<div class="row" style="--bc:${b.color};--cc:${c.color}"><div class="rank num">${i+1}</div>${thumb({cat:c.k,photo:r.photo})}
+        <div class="meta"><div class="name">${esc(r.place)}</div><div class="sub"><span class="avs">${r.entries.map(e=>avatar(e.p,20)).join('')}</span><span class="num">${r.entries.length>1?`${r.lo.toFixed(1)}–${r.hi.toFixed(1)}`:'1 rating'}</span>${r.location?`<span>${esc(r.location)}</span>`:''}</div></div>
+        <div class="right">${scoreBubble(r.avg,b)}${tierBadge(tierOf(r.avg))}</div></div>`; }).join('')}</div>`
+      :`<div class="empty" style="--cc:${c.color}"><div class="big">${foodIcon(c.k)}</div><h3>Nothing here yet</h3><p>${ui.groupMin2?'No spot has been ranked by two people yet.':'Nobody has ranked '+c.name.toLowerCase()+' yet.'}</p></div>`}
+    <p class="muted" style="font-size:13px;margin:14px 4px">Group score is the average of everyone's score for that spot. The range shows the lowest and highest.</p>`;
+}
+function viewProfiles(){
+  const syncText={cloud:['Saved to your Claude account','var(--liked)'],connecting:['Connecting to your account…','var(--pizza)'],device:['Saved on this device only','#BFA98F'],local:['Saved on this device. Back up to move it to another phone.','var(--pizza)']}[syncMode];
+  return `<div class="stack">${S.profiles.map(p=>{ const n=Object.values(S.items).filter(i=>i.profileId===p.id);
+      const per=CATS.map(c=>[c,n.filter(i=>i.cat===c.k).length]).filter(x=>x[1]).map(([c,k])=>`${c.name} ${k}`).join(' · ');
+      return `<div class="card pcard">${avatar(p,48)}<div><div class="pn">${esc(p.name)}</div><div class="ps num">${n.length} ranked${per?' · '+per:''}</div></div>
+        <div style="display:flex;gap:6px;align-items:center">${p.id===S.activeId?'<span class="pill-on">Active</span>':`<button class="small-btn" data-a="switch" data-id="${p.id}">Switch</button>`}<button class="icon-btn" data-a="edit-profile" data-id="${p.id}" aria-label="Edit ${esc(p.name)}">${ic.pen}</button></div></div>`; }).join('')}
+      <button class="btn block" data-a="new-profile">${ic.plus.replace('<svg','<svg width="18" height="18"')} Add a friend</button>
+    </div>
+    <h3 class="section-title">How scores work</h3>
+    <div class="card"><p class="muted" style="margin:0 0 12px;line-height:1.45">You never type a number. Pick how it was, answer a few "which was better?" questions, and Tummi works out the score from where it lands.</p><button class="btn block" data-a="info">See the scoring rules</button></div>
+    <h3 class="section-title">Data</h3>
+    <div class="card stack"><div class="sync" style="--sc:${syncText[1]}"><i></i>${syncText[0]}</div>
+      ${!IN_CLAUDE?`<div class="two"><button class="btn sm" data-a="export">Back up</button><label class="btn sm" for="imp" style="cursor:pointer">Restore<input id="imp" type="file" accept="application/json,.json" data-change="import" hidden></label></div>`:''}
+      ${!hasDemo()?'<button class="btn block" data-a="demo">Load sample data</button>':''}
+      <button class="btn block danger ${ui.armReset?'armed':''}" data-a="reset">${ui.armReset?'Tap again to erase everything':'Erase all profiles and rankings'}</button></div>`;
+}
+const VIEWS={lists:viewLists, map:viewMap, areas:viewAreas, crew:viewCrew};
+
+/* ============ sheets ============ */
+function sheetSwitcher(){
+  return `<div class="panel" role="dialog" aria-label="Switch profile"><div class="grab"></div><h2 style="margin:0 4px 12px">Who's eating?</h2>
+    <div class="stack">${S.profiles.map(p=>`<button class="card pcard" data-a="switch" data-id="${p.id}" style="text-align:left">${avatar(p,40)}<div class="pn">${esc(p.name)}</div>${p.id===S.activeId?'<span class="pill-on">Active</span>':'<span></span>'}</button>`).join('')}
+    <div class="two"><button class="btn" data-a="new-profile">Add a friend</button><button class="btn" data-a="manage">Manage</button></div></div></div>`;
+}
+function sheetProfile(){
+  const sh=ui.sheet; const d=sh.draft; const existing=profile(sh.id);
+  const count=existing? Object.values(S.items).filter(i=>i.profileId===existing.id).length : 0;
+  return `<div class="panel" role="dialog" aria-label="Profile"><div class="grab"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin:0 4px 16px">${avatar({...d, name:d.name||'?'},56)}<h2>${existing?'Edit profile':'New friend'}</h2></div>
+    ${sh.error?`<div class="err">${esc(sh.error)}</div>`:''}
+    <div class="field"><label for="pf-name">Name</label><input id="pf-name" class="input" value="${esc(d.name)}" placeholder="e.g. Jess" maxlength="24" autocomplete="off"></div>
+    <div class="field"><span class="lab">Color</span><div class="swatches">${P_COLORS.map(c=>`<button class="sw ${d.color===c?'on':''}" style="--pc:${c}" data-a="pf-color" data-v="${c}" aria-label="Color ${c}"></button>`).join('')}</div></div>
+    <div class="stack"><button class="btn primary block" data-a="pf-save">${existing?'Save':'Add profile'}</button>
+    ${existing && S.profiles.length>1?`<button class="btn block danger ${sh.armDel?'armed':''}" data-a="pf-del">${sh.armDel?`Tap again to delete ${esc(existing.name)} and ${count} ${count===1?'ranking':'rankings'}`:'Delete profile'}</button>`:''}</div></div>`;
+}
+function sheetInfo(){
+  return `<div class="panel info" role="dialog" aria-label="How scores work"><div class="grab"></div><h2>How scores work</h2>
+    <h3>1 · Your gut sets the range</h3><p>Every bite starts in one of three buckets, and the bucket caps the score. A burger you didn't like can never outscore one you loved.</p>
+    <div class="ranges">${BUCKETS.map(b=>`<div><span style="width:18px;height:18px;display:grid;color:${b.color}">${FACE[b.k]}</span>${b.label}<b>${b.lo.toFixed(1)} – ${b.hi.toFixed(1)}</b></div>`).join('')}</div>
+    <h3>2 · Head-to-heads find the exact spot</h3><p>Tummi asks "which was better?" against items already in that bucket, halving the list each time. With 8 items it takes about 3 questions; with 30, about 5.</p>
+    <h3>3 · Position becomes the score</h3><p>Items are spread evenly across the bucket's range. With one item it sits in the middle. Nothing hits a perfect 10; the top spot creeps toward it as your list grows.</p>
+    <h3>4 · Scores move as you eat more</h3><p>Adding new items nudges everyone's score, because scores are relative to what you've eaten. "Too close to call" puts two items side by side with the same score.</p>
+    <h3>Areas</h3><p>An area's score is the average of every ranking with that Location.</p>
+    <h3>Tiers</h3><div class="ranges"><div>${tierBadge('S')} Legendary<b>9.0+</b></div><div>${tierBadge('A')} Great<b>8.0 – 8.9</b></div><div>${tierBadge('B')} Good<b>6.7 – 7.9</b></div><div>${tierBadge('C')} Fine<b>5.0 – 6.6</b></div><div>${tierBadge('D')} Skip<b>under 5.0</b></div></div>
+    <button class="btn primary block" data-a="close" style="margin-top:12px">Got it</button></div>`;
+}
+function sheetItem(){
+  const it=S.items[ui.sheet.id]; if(!it){ ui.sheet=null; return ''; }
+  const c=CAT[it.cat]; const owner=profile(it.profileId);
+  const rows=ranked(it.profileId,it.cat); const r=rows.find(x=>x.item.id===it.id);
+  const withNames=[...(it.withIds||[]).map(id=>profile(id)?.name).filter(Boolean), it.withText].filter(Boolean).join(', ');
+  const facts=[['Price',it.price?`$${Number(it.price).toFixed(2).replace(/\.00$/,'')}`:''],['Date',fmtDate(it.date)],['Area',it.location],['With',withNames]].filter(f=>f[1]);
+  return `<div class="panel" role="dialog" aria-label="${esc(it.place)}" style="--cc:${c.color}"><div class="grab"></div>
+    ${it.photo?`<img class="hero" src="${it.photo}" alt="${esc(it.place)}">`:`<div class="hero emoji">${foodIcon(c.k)}</div>`}
+    <div class="item-head"><div><h2>${esc(it.place)}</h2>${it.dish?`<div class="dish">${esc(it.dish)}</div>`:''}<div class="tags">${catTag(c)}${it.style?`<span class="tag">${esc(it.style)}</span>`:''}</div></div>
+      ${r?`<div class="score-wrap">${scoreBubble(r.score,r.bucket,'big')}${tierBadge(r.tier)}</div>`:''}</div>
+    ${r?`<div class="rankline"><b class="num">#${r.rank} of ${rows.length}</b> ${c.name.toLowerCase()} for ${esc(owner?.name)} · ${r.bucket.label}${r.tied?' · tied':''}</div>`:''}
+    ${facts.length||it.address?`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}${it.address&&it.address!==it.location+', MI'?`<div class="w"><dt>Address</dt><dd>${esc(it.address)}</dd></div>`:''}</dl>`:''}
+    ${it.notes?`<div class="notes">${esc(it.notes)}</div>`:''}
+    <div class="actions"><button class="btn primary" data-a="rerank" data-id="${it.id}">Re-rank</button><button class="btn" data-a="edit-item" data-id="${it.id}">Edit details</button>
+      ${hasPin(it)&&!IN_CLAUDE?`<button class="btn wide" data-a="show-on-map" data-id="${it.id}">Show on map</button>`:''}
+      <button class="btn danger wide ${ui.sheet.armDel?'armed':''}" data-a="del-item" data-id="${it.id}">${ui.sheet.armDel?'Tap again to delete':'Delete'}</button></div></div>`;
+}
+
+/* ---- rank flow ---- */
+function startFlow(mode, opts={}){
+  const p=activeProfile();
+  if(mode==='new'){
+    const c = opts.cat || ui.cat;
+    flow={mode, step:'details', item:{id:uid(), profileId:p.id, cat:c, place:'', dish:'', style:'', photo:null, price:'', date:today(), location:ui.area? (areaNames(Object.values(S.items)).get(ui.area)||'') : '', lat:null, lng:null, address:'', withIds:[], withText:'', notes:'', tie:null, createdAt:Date.now()}};
+  } else {
+    const src=S.items[opts.id]; if(!src) return;
+    flow={mode, step: mode==='rerank'?'bucket':'details', item:clone(src)};
+  }
+  ui.sheet={type:'flow'}; render();
+  if(flow.step==='details') setTimeout(()=>{ const el=$('#f-place'); if(el && !flow.item.place) el.focus(); },260);
+}
+function syncForm(){
+  if(!flow || flow.step!=='details') return;
+  document.querySelectorAll('[data-f]').forEach(el=>{ flow.item[el.dataset.f]=el.value; });
+}
+function pinField(it){
+  if(IN_CLAUDE) return '';
+  return `<div class="field"><span class="lab">Map pin <span class="opt">puts it on the map</span></span>
+    ${hasPin(it)?`<div class="pinned"><span style="flex:none;width:18px;height:18px;display:grid">${ic.map}</span><span>${esc(it.address||'Pinned')}</span><button class="small-btn" data-a="geo-clear">Remove</button></div>`:''}
+    <div class="two"><button class="btn sm" data-a="geo-search">Find this place</button><button class="btn sm" data-a="geo-here">I'm here now</button></div>
+    ${flow.geoMsg?`<span class="opt">${esc(flow.geoMsg)}</span>`:''}
+    ${flow.geoResults?.length?`<div class="geo-results">${flow.geoResults.map((g,i)=>`<button data-a="geo-pick" data-i="${i}"><b>${esc(g.name)}</b><small>${esc(g.addr)}</small></button>`).join('')}</div>`:''}</div>`;
+}
+function flowDetails(){
+  const it=flow.item; const c=CAT[it.cat]; const p=profile(it.profileId);
+  const pastPlaces=[...new Set(Object.values(S.items).filter(i=>i.cat===it.cat).map(i=>i.place))].sort();
+  const pastAreas=[...areaNames(Object.values(S.items)).values()].sort();
+  const pastStyles=Object.values(S.items).filter(i=>i.cat===it.cat && i.style).map(i=>i.style);
+  const styles=[...new Set([...c.styles, ...pastStyles])];
+  const others=S.profiles.filter(x=>x.id!==it.profileId);
+  const edit=flow.mode==='edit';
+  return `<div class="sheet-head"><button data-a="flow-close" aria-label="Close">${ic.x}</button><div class="t">${edit?'Edit details':'Rank a bite'}</div><div class="steps">${edit?'':'1 of 3'}</div></div>
+  <div class="sheet-body">
+    ${flow.error?`<div class="err"><span>${flow.error}</span>${flow.dupId?`<button class="small-btn" data-a="rerank" data-id="${flow.dupId}">Re-rank that one instead</button>`:''}</div>`:''}
+    <div class="field"><span class="lab">What did ${others.length?esc(p.name):'you'} eat?</span><div class="catgrid">${CATS.map(x=>`<button class="ctile ${x.k===it.cat?'on':''}" style="--cc:${x.color};--ct:${x.text}" data-a="f-cat" data-cat="${x.k}" ${edit?'disabled':''}><span class="e">${foodIcon(x.k)}</span>${x.name}</button>`).join('')}</div>${edit?'<span class="opt">To move it to another food, delete it and rank it again.</span>':''}</div>
+    <div class="field"><label for="f-place">Place</label><input id="f-place" class="input" data-f="place" list="dl-places" value="${esc(it.place)}" placeholder="e.g. Smash Shack" autocomplete="off" maxlength="60"><datalist id="dl-places">${pastPlaces.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></div>
+    <div class="field"><label for="f-loc">Location <span class="opt">city or neighborhood, used for Areas</span></label><input id="f-loc" class="input" data-f="location" list="dl-areas" value="${esc(it.location)}" placeholder="e.g. Royal Oak" autocomplete="off" maxlength="40"><datalist id="dl-areas">${pastAreas.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></div>
+    ${pinField(it)}
+    <div class="field"><label for="f-dish">Dish name <span class="opt">optional, for a second item from the same place</span></label><input id="f-dish" class="input" data-f="dish" value="${esc(it.dish)}" placeholder="e.g. Double smash w/ onions" autocomplete="off" maxlength="60"></div>
+    <div class="field"><label for="f-style">Style <span class="opt">a label for reference, never ranked separately</span></label>
+      <div class="chips" style="margin:0">${styles.map(s=>`<button class="chip ${it.style===s?'on':''}" data-a="f-style" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+      <input id="f-style" class="input" data-f="style" value="${esc(it.style)}" placeholder="Or type your own" autocomplete="off" maxlength="30"></div>
+    <div class="field"><span class="lab">Photo</span><label class="photo" for="f-photo">${it.photo?`<img src="${it.photo}" alt="Your photo">`:`<span style="width:28px;height:28px;display:grid">${ic.plus}</span><span>Add a photo</span>`}<input id="f-photo" type="file" accept="image/*" data-change="photo"></label>${it.photo?'<button class="small-btn" data-a="f-nophoto" style="align-self:flex-start">Remove photo</button>':''}</div>
+    <div class="two"><div class="field"><label for="f-price">Price</label><div class="prefix"><span>$</span><input id="f-price" class="input" data-f="price" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(it.price)}" placeholder="0.00"></div></div>
+      <div class="field"><label for="f-date">Date</label><input id="f-date" class="input" data-f="date" type="date" value="${esc(it.date)}"></div></div>
+    <div class="field"><label for="f-with">Who you were with</label>${others.length?`<div class="chips" style="margin:0">${others.map(o=>`<button class="chip ${it.withIds.includes(o.id)?'on':''}" data-a="f-with" data-id="${o.id}">${esc(o.name)}</button>`).join('')}</div>`:''}
+      <input id="f-with" class="input" data-f="withText" value="${esc(it.withText)}" placeholder="${others.length?'Anyone else?':'Names'}" autocomplete="off" maxlength="80"></div>
+    <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" class="input" data-f="notes" placeholder="What made it good (or not)?" maxlength="600">${esc(it.notes)}</textarea></div>
+  </div>
+  <div class="sheet-foot"><button class="btn primary block" data-a="${edit?'flow-save':'flow-next'}">${edit?'Save changes':'Next: how was it?'}</button></div>`;
+}
+function flowBucket(){
+  const it=flow.item; const c=CAT[it.cat];
+  return `<div class="sheet-head"><button data-a="${flow.mode==='rerank'?'flow-close':'flow-back'}" aria-label="Back">${flow.mode==='rerank'?ic.x:ic.back}</button><div class="t">${flow.mode==='rerank'?'Re-rank':'Rank a bite'}</div><div class="steps">${flow.mode==='rerank'?'':'2 of 3'}</div></div>
+  <div class="sheet-body"><div class="ask">How was the ${esc(it.place)} ${c.one}?</div>
+    <div class="buckets">${BUCKETS.map(b=>{ const n=catOrder(it.profileId,it.cat)[b.k].filter(id=>id!==it.id && S.items[id]).length;
+      return `<button class="bucket" style="--b:${b.color}" data-a="bucket" data-v="${b.k}"><span class="face">${FACE[b.k]}</span><span><span class="bl">${b.label}</span><br><span class="br">${n} already here</span></span><span class="br num">${b.lo.toFixed(1)}–${b.hi.toFixed(1)}</span></button>`; }).join('')}</div></div>`;
+}
+function flowCompare(){
+  const it=flow.item; const L=flow.list; const other=S.items[L[flow.mid]];
+  const rows=ranked(it.profileId,it.cat); const orow=rows.find(r=>r.item.id===other.id);
+  const remaining=Math.ceil(Math.log2(flow.hi-flow.lo+1));
+  const total=Math.max(flow.count, flow.count-1+remaining);
+  const card=(x,label,choice,r)=>`<button class="vs-card" data-a="choose" data-r="${choice}">${thumb(x)}<div class="meta"><div class="vs-label">${label}</div><div class="vs-name">${esc(x.place)}</div><div class="sub">${x.dish?`<span>${esc(x.dish)}</span>`:''}${x.style?`<span class="tag">${esc(x.style)}</span>`:''}${x.location?`<span>${esc(x.location)}</span>`:''}</div></div>${r?scoreBubble(r.score,r.bucket,'sm'):''}</button>`;
+  return `<div class="sheet-head"><button data-a="cmp-undo" aria-label="Back">${ic.back}</button><div class="t">Which was better?</div><div class="steps">${flow.mode==='rerank'?'':'3 of 3'}</div></div>
+  <div class="sheet-body">
+    <div class="progress" aria-label="Question ${flow.count} of about ${total}">${Array.from({length:total},(_,i)=>`<i class="${i<flow.count?'done':''}"></i>`).join('')}</div>
+    <p class="muted" style="text-align:center;margin:0 0 14px">Tap the one you'd rather eat again.</p>
+    <div class="vs-wrap">${card(it, flow.mode==='rerank'?'Re-ranking':'New', 'new', null)}<span class="vs-mid">vs</span>${card(other, orow?`Your #${orow.rank}`:'Ranked', 'old', orow)}</div>
+    <div class="flow-actions"><button class="btn" data-a="choose" data-r="tie">Too close to call</button><button class="btn" data-a="choose" data-r="skip">Not sure, skip</button></div>
+  </div>`;
+}
+function flowResult(){
+  const it=S.items[flow.resultId]; const c=CAT[it.cat];
+  const rows=ranked(it.profileId,it.cat); const r=rows.find(x=>x.item.id===it.id);
+  return `<div class="sheet-head"><span></span><div class="t">Ranked!</div><span></span></div>
+  <div class="sheet-body"><div class="result" style="--cc:${c.color}">
+    <div class="burst">${scoreBubble(r.score,r.bucket,'big')}</div>${tierBadge(r.tier)}
+    <h2 style="font-size:28px">${esc(it.place)}</h2>
+    <p class="muted" style="margin:0;font-size:17px">is <b class="num" style="color:var(--ink)">#${r.rank} of ${rows.length}</b> ${c.name.toLowerCase()}${r.tied?', tied':''}</p>
+    ${rows.length<MIN_FOR_STABLE?`<p class="muted" style="margin:6px 0 0;font-size:14px;max-width:30ch">Rank ${MIN_FOR_STABLE-rows.length} more to settle the scale.</p>`:''}
+  </div></div>
+  <div class="sheet-foot"><div class="two"><button class="btn" data-a="flow-another">Rank another</button><button class="btn primary" data-a="flow-done">Done</button></div></div>`;
+}
+function sheetFlow(){
+  if(!flow) return '';
+  const body={details:flowDetails, bucket:flowBucket, compare:flowCompare, result:flowResult}[flow.step]();
+  return `<div class="panel full" role="dialog" aria-label="Rank">${body}</div>`;
+}
+function chooseBucket(k){
+  const it=flow.item; flow.bucket=k;
+  flow.list=catOrder(it.profileId,it.cat)[k].filter(id=>id!==it.id && S.items[id]);
+  flow.lo=0; flow.hi=flow.list.length; flow.history=[]; flow.count=0; flow.step='compare';
+  nextCompare();
+}
+function nextCompare(){
+  if(flow.lo>=flow.hi){ finalize(flow.lo, null); return; }
+  flow.mid=Math.floor((flow.lo+flow.hi)/2); flow.count++;
+  renderSheet();
+}
+function choose(res){
+  const L=flow.list, mid=flow.mid;
+  if(res==='tie'){ finalize(null, L[mid]); return; }
+  if(res==='skip'){ finalize(mid, null); return; }
+  flow.history.push({lo:flow.lo, hi:flow.hi});
+  const g=S.items[L[mid]].tie; let s=mid, e=mid;
+  if(g){ while(s-1>=flow.lo && S.items[L[s-1]].tie===g) s--; while(e+1<flow.hi && S.items[L[e+1]].tie===g) e++; }
+  if(res==='new') flow.hi=s; else flow.lo=e+1;
+  nextCompare();
+}
+function undoCompare(){
+  if(!flow.history.length){ flow.step='bucket'; renderSheet(); return; }
+  const h=flow.history.pop(); flow.lo=h.lo; flow.hi=h.hi; flow.count=Math.max(0,flow.count-2); nextCompare();
+}
+function finalize(pos, tieWithId){
+  const it=flow.item; const changed=[it.id];
+  if(S.items[it.id]) changed.push(...removeFromOrder(S.items[it.id]));
+  it.tie=null;
+  S.items[it.id]=it;
+  const o=catOrder(it.profileId,it.cat);
+  o[flow.bucket]=o[flow.bucket].filter(id=>id!==it.id && S.items[id]);
+  const arr=o[flow.bucket];
+  if(tieWithId){
+    const other=S.items[tieWithId]; const g=other.tie || ('t'+uid());
+    if(!other.tie){ other.tie=g; changed.push(other.id); }
+    it.tie=g;
+    let idx=arr.indexOf(tieWithId); while(idx+1<arr.length && S.items[arr[idx+1]].tie===g) idx++;
+    arr.splice(idx+1,0,it.id);
+  } else {
+    let p=Math.max(0,Math.min(pos,arr.length));
+    while(p>0 && p<arr.length && S.items[arr[p-1]].tie && S.items[arr[p-1]].tie===S.items[arr[p]].tie) p++;
+    arr.splice(p,0,it.id);
+  }
+  commit({items:[...new Set(changed)]});
+  ui.mapFit=true;
+  flow.resultId=it.id; flow.step='result';
+  render();
+}
+
+/* ---- address search (OpenStreetMap Nominatim, hosted version only) ---- */
+function areaOf(a){ return a? (a.city||a.town||a.village||a.suburb||a.hamlet||a.county||'') : ''; }
+function shortAddr(a,full){ if(!a) return full||''; const street=[a.house_number,a.road].filter(Boolean).join(' '); return [street, areaOf(a), a.state].filter(Boolean).join(', ') || full; }
+async function geoSearch(){
+  const it=flow.item;
+  if(!it.place.trim()){ flow.geoMsg='Type the place name first.'; renderSheet(); return; }
+  flow.geoMsg='Searching…'; flow.geoResults=[]; renderSheet();
+  const q=[it.place.trim(), it.location.trim()].filter(Boolean).join(', ');
+  let url=`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=us&q=${encodeURIComponent(q)}`;
+  if(flow.here){ const {lat,lng}=flow.here; url+=`&viewbox=${lng-.1},${lat+.1},${lng+.1},${lat-.1}`; }
+  try{
+    const r=await fetch(url,{headers:{'Accept':'application/json'}}); if(!r.ok) throw 0;
+    const j=await r.json();
+    if(!flow) return; syncForm();
+    flow.geoResults=j.map(x=>({name:x.name||x.display_name.split(',')[0], addr:shortAddr(x.address,x.display_name), lat:+x.lat, lng:+x.lon, area:areaOf(x.address)}));
+    flow.geoMsg= j.length? 'Tap the right one:' : (it.location? 'No match. Try "I\'m here now" while you\'re at the place.' : 'No match. Add the city in Location and try again.');
+  }catch(e){ if(!flow) return; syncForm(); flow.geoMsg="Search isn't working right now. Try again in a moment."; }
+  renderSheet();
+}
+function geoHere(){
+  if(!navigator.geolocation){ flow.geoMsg='Location isn\'t available in this browser.'; renderSheet(); return; }
+  flow.geoMsg='Finding you…'; renderSheet();
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    if(!flow) return; syncForm();
+    const lat=+pos.coords.latitude.toFixed(5), lng=+pos.coords.longitude.toFixed(5);
+    flow.here={lat,lng}; Object.assign(flow.item,{lat,lng,address:'Where you were'});
+    flow.geoMsg='Pinned to where you are.';
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=17&lat=${lat}&lon=${lng}`); const j=await r.json();
+      if(!flow) return; syncForm();
+      flow.item.address=shortAddr(j.address,j.display_name)||'Where you were';
+      if(!flow.item.location.trim()) flow.item.location=areaOf(j.address);
+    }catch(e){}
+    renderSheet();
+    if(flow.item.place.trim()) geoSearch(); // suggest the restaurant itself, biased to here
+  }, ()=>{ if(!flow) return; syncForm(); flow.geoMsg='Location permission was denied. Turn it on in your browser settings, or use Find this place.'; renderSheet(); }, {enableHighAccuracy:true, timeout:12000, maximumAge:30000});
+}
+
+/* ============ render ============ */
+function renderSheet(){
+  const el=$('#sheet');
+  if(!ui.sheet){ el.className=''; el.innerHTML=''; document.body.classList.remove('locked'); return; }
+  const builders={switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
+  const inner=builders[ui.sheet.type]();
+  if(!ui.sheet){ renderSheet(); return; }
+  const prevSc = el.querySelector('.sheet-body, .panel:not(.full)');
+  const kind=ui.sheet.type+(flow?.step||'');
+  const top = prevSc && el.dataset.kind===kind ? prevSc.scrollTop : 0;
+  el.dataset.kind=kind;
+  el.innerHTML=`${ui.sheet.type==='flow'?'':'<div class="backdrop" data-a="close"></div>'}${inner}`;
+  el.className='open'; document.body.classList.add('locked');
+  const sc=el.querySelector('.sheet-body, .panel:not(.full)'); if(sc && top) sc.scrollTop=top;
+}
+function renderMain(){
+  if(!profile(S.activeId)) S.activeId=S.profiles[0].id;
+  if(lmap && ui.tab!=='map'){ lmap.remove(); lmap=null; }
+  $('#app').innerHTML = header() + `<main>${VIEWS[ui.tab]()}</main>` + tabbar();
+  if(ui.tab==='map' && !IN_CLAUDE) mountMap();
+  if(ui.flash){ const id=ui.flash; setTimeout(()=>{ if(ui.flash===id) ui.flash=null; },1500); }
+}
+function render(){ renderMain(); renderSheet(); }
+function closeSheet(){ ui.sheet=null; flow=null; render(); }
+
+/* ============ photo ============ */
+function resizeImage(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{ const img=new Image();
+      img.onload=()=>{ const max=720; const s=Math.min(1,max/Math.max(img.width,img.height));
+        const c=document.createElement('canvas'); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        let q=.8, url=c.toDataURL('image/jpeg',q); while(url.length>170000 && q>.35){ q-=.1; url=c.toDataURL('image/jpeg',q); }
+        res(url); };
+      img.onerror=()=>rej(new Error('image')); img.src=fr.result; };
+    fr.onerror=()=>rej(new Error('read')); fr.readAsDataURL(file);
+  });
+}
+
+/* ============ events ============ */
+document.addEventListener('change', async e=>{
+  const el=e.target; const kind=el.dataset.change;
+  if(kind==='photo' && el.files && el.files[0]){
+    syncForm();
+    try{ flow.item.photo=await resizeImage(el.files[0]); }catch(_){ toast("That photo couldn't be read. Try a JPG or PNG."); }
+    renderSheet();
+  }
+  if(kind==='area'){ ui.area=el.value; ui.style='all'; renderMain(); }
+  if(kind==='import' && el.files && el.files[0]) importBackup(el.files[0]);
+});
+document.addEventListener('click', e=>{
+  const t=e.target.closest('[data-a]'); if(!t) return;
+  const a=t.dataset.a; const d=t.dataset;
+  syncForm();
+  if(a!=='reset') ui.armReset=false;
+  switch(a){
+    case 'tab': ui.tab=d.tab; window.scrollTo(0,0); render(); break;
+    case 'set-cat': ui.cat=d.cat; ui.style='all'; renderMain(); break;
+    case 'style': ui.style=d.v; renderMain(); break;
+    case 'clear-area': ui.area=''; renderMain(); break;
+    case 'area-scope': ui.areaScope=d.v; renderMain(); break;
+    case 'area-cat': ui.areaCat=d.cat; renderMain(); break;
+    case 'area-min': ui.areaMin=d.v==='1'; renderMain(); break;
+    case 'open-area':
+      if(ui.areaScope==='all'){ ui.crew='board'; }
+      ui.area=d.k; ui.style='all'; if(ui.areaCat!=='all') ui.cat=ui.areaCat;
+      else { const p=activeProfile(); const best=CATS.map(c=>[c.k, ranked(p.id,c.k).filter(r=>norm(r.item.location)===d.k).length]).sort((x,y)=>y[1]-x[1])[0]; if(best && best[1]) ui.cat=best[0]; }
+      ui.tab='lists'; window.scrollTo(0,0); render(); break;
+    case 'map-scope': ui.mapScope=d.v; ui.mapFit=true; renderMain(); break;
+    case 'map-cat': ui.mapCat=d.cat; ui.mapFit=true; renderMain(); break;
+    case 'locate': locateMe(); break;
+    case 'show-on-map': ui.mapFocus=d.id; ui.mapScope= S.items[d.id].profileId===S.activeId ? 'me' : 'all'; ui.mapCat='all'; ui.sheet=null; ui.tab='map'; window.scrollTo(0,0); render(); break;
+    case 'crew': ui.crew=d.v; renderMain(); break;
+    case 'cmp-cat': ui.cmpCat=d.cat; renderMain(); break;
+    case 'group-cat': ui.groupCat=d.cat; renderMain(); break;
+    case 'gmin': ui.groupMin2=d.v==='1'; renderMain(); break;
+    case 'cmp-a': ui.cmpA=d.id; if(ui.cmpB===d.id) ui.cmpB=null; renderMain(); break;
+    case 'cmp-b': if(d.id!==ui.cmpA){ ui.cmpB=d.id; renderMain(); } break;
+    case 'switcher': ui.sheet={type:'switcher'}; renderSheet(); break;
+    case 'manage': ui.sheet=null; ui.tab='crew'; ui.crew='profiles'; render(); break;
+    case 'switch': S.activeId=d.id; ui.cmpA=d.id; ui.area=''; ui.mapFit=true; commit(); ui.sheet=null; render(); toast(`Ranking as ${profile(d.id).name}`); break;
+    case 'close': closeSheet(); break;
+    case 'info': ui.sheet={type:'info'}; renderSheet(); break;
+    case 'export': exportBackup(); break;
+    case 'demo': buildDemo(); ui.mapFit=true; commit({items:Object.keys(S.items)}); render(); toast('Sample data loaded'); break;
+    case 'clear-demo': clearDemo(); render(); break;
+    case 'reset':
+      if(!ui.armReset){ ui.armReset=true; renderMain(); break; }
+      { const del=Object.keys(S.items); const keep=activeProfile(); S={profiles:[{...keep, demo:false}], activeId:keep.id, orders:{}, items:{}}; ui.armReset=false; ui.area=''; commit({del}); render(); toast('Everything erased'); }
+      break;
+    // profiles
+    case 'new-profile': ui.sheet={type:'profile', id:null, draft:{name:'', color:P_COLORS[S.profiles.length%P_COLORS.length]}}; renderSheet(); setTimeout(()=>$('#pf-name')?.focus(),260); break;
+    case 'edit-profile': { const p=profile(d.id); ui.sheet={type:'profile', id:p.id, draft:{name:p.name, color:p.color}}; renderSheet(); } break;
+    case 'pf-color': ui.sheet.draft.name=$('#pf-name').value; ui.sheet.draft.color=d.v; renderSheet(); break;
+    case 'pf-emoji': ui.sheet.draft.name=$('#pf-name').value; ui.sheet.draft.emoji=d.v; renderSheet(); break;
+    case 'pf-save': {
+      const sh=ui.sheet; sh.draft.name=$('#pf-name').value.trim();
+      if(!sh.draft.name){ sh.error='Give this profile a name.'; renderSheet(); break; }
+      if(S.profiles.some(p=>p.id!==sh.id && norm(p.name)===norm(sh.draft.name))){ sh.error='There is already a profile with that name.'; renderSheet(); break; }
+      if(sh.id){ Object.assign(profile(sh.id), sh.draft, {demo:false}); }
+      else { S.profiles.push({id:'p_'+uid(), ...sh.draft}); }
+      commit(); ui.sheet=null; render(); toast(sh.id?'Profile saved':`${sh.draft.name} added`);
+    } break;
+    case 'pf-del': {
+      const sh=ui.sheet; if(!sh.armDel){ sh.armDel=true; sh.draft.name=$('#pf-name').value; renderSheet(); break; }
+      const del=Object.values(S.items).filter(i=>i.profileId===sh.id).map(i=>i.id);
+      del.forEach(id=>delete S.items[id]); delete S.orders[sh.id];
+      Object.values(S.items).forEach(i=>{ if(i.withIds) i.withIds=i.withIds.filter(x=>x!==sh.id); });
+      S.profiles=S.profiles.filter(p=>p.id!==sh.id); if(S.activeId===sh.id) S.activeId=S.profiles[0].id;
+      commit({del}); ui.sheet=null; render(); toast('Profile deleted');
+    } break;
+    // items
+    case 'open-item': ui.sheet={type:'item', id:d.id}; renderSheet(); break;
+    case 'del-item': {
+      if(!ui.sheet.armDel){ ui.sheet.armDel=true; renderSheet(); break; }
+      const it=S.items[d.id]; const changed=removeFromOrder(it); delete S.items[d.id];
+      commit({items:changed, del:[d.id]}); ui.sheet=null; ui.mapFit=true; render(); toast('Deleted');
+    } break;
+    case 'edit-item': startFlow('edit',{id:d.id}); break;
+    case 'rerank': startFlow('rerank',{id:d.id}); break;
+    case 'add': startFlow('new',{cat:d.cat}); break;
+    // flow
+    case 'flow-close': closeSheet(); break;
+    case 'f-cat': flow.item.cat=d.cat; flow.item.style=''; renderSheet(); break;
+    case 'f-style': flow.item.style= flow.item.style===d.v ? '' : d.v; renderSheet(); break;
+    case 'f-with': { const w=flow.item.withIds; const i=w.indexOf(d.id); i>=0?w.splice(i,1):w.push(d.id); renderSheet(); } break;
+    case 'f-nophoto': flow.item.photo=null; renderSheet(); break;
+    case 'geo-search': geoSearch(); break;
+    case 'geo-here': geoHere(); break;
+    case 'geo-pick': { const g=flow.geoResults[+d.i]; Object.assign(flow.item,{lat:g.lat, lng:g.lng, address:g.addr}); if(!flow.item.location.trim() && g.area) flow.item.location=g.area; flow.geoResults=[]; flow.geoMsg=''; renderSheet(); } break;
+    case 'geo-clear': Object.assign(flow.item,{lat:null,lng:null,address:''}); renderSheet(); break;
+    case 'flow-next': case 'flow-save': {
+      const it=flow.item; it.place=it.place.trim(); it.dish=it.dish.trim(); it.style=it.style.trim(); it.location=it.location.trim();
+      // reuse the existing spelling of an area so "royal oak" and "Royal Oak" group together
+      const known=areaNames(Object.values(S.items).filter(i=>i.id!==it.id)); if(known.has(norm(it.location))) it.location=known.get(norm(it.location));
+      flow.error=null; flow.dupId=null;
+      if(!it.place){ flow.error='Add the place name so you can find it later.'; renderSheet(); $('.sheet-body').scrollTop=0; break; }
+      const dup=Object.values(S.items).find(i=>i.id!==it.id && i.profileId===it.profileId && i.cat===it.cat && norm(i.place)===norm(it.place) && norm(i.dish)===norm(it.dish));
+      if(dup){ flow.error=`${esc(profile(it.profileId).name)} already ranked ${dup.dish?esc(dup.dish)+' at ':''}${esc(dup.place)}. Add a dish name to tell them apart.`; flow.dupId=dup.id; renderSheet(); $('.sheet-body').scrollTop=0; break; }
+      if(a==='flow-save'){ S.items[it.id]=it; commit({items:[it.id]}); ui.mapFit=true; ui.sheet={type:'item', id:it.id}; flow=null; render(); toast('Saved'); break; }
+      flow.step='bucket'; renderSheet();
+    } break;
+    case 'flow-back': flow.step='details'; renderSheet(); break;
+    case 'bucket': chooseBucket(d.v); break;
+    case 'choose': choose(d.r); break;
+    case 'cmp-undo': undoCompare(); break;
+    case 'flow-done': { const it=S.items[flow.resultId]; ui.tab='lists'; ui.cat=it.cat; ui.style='all'; if(ui.area && norm(it.location)!==ui.area) ui.area=''; ui.flash=it.id; S.activeId=it.profileId; closeSheet(); setTimeout(()=>document.querySelector('.row.flash')?.scrollIntoView({block:'center',behavior:'smooth'}),50); } break;
+    case 'flow-another': { const cat=flow.item.cat; ui.cat=cat; flow=null; startFlow('new',{cat}); } break;
+  }
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ui.sheet && !(ui.sheet.type==='flow' && flow?.step==='compare')) closeSheet(); });
+
+/* ============ boot ============ */
+(async function boot(){
+  if(await loadLocal()){ persisted=true; }
+  else {
+    S={profiles:[{id:'p_me', name:'Andrew', color:'#DD5A3E'}], activeId:'p_me', orders:{}, items:{}};
+    buildDemo(); persisted=false; // samples are shown, not saved, until you change something
+  }
+  ui.cmpA=S.activeId;
+  render();
+  connectRemote();
+})();
+</script>
+</body>
+</html>
