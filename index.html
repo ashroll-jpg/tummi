@@ -244,6 +244,16 @@ textarea.input{min-height:84px;resize:vertical}
 .geo-results button{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
 .geo-results b{display:block}
 .geo-results small{color:var(--ink-2);font-size:12.5px}
+.ac{position:relative}
+.ac-list{display:none;flex-direction:column;margin-top:6px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);overflow:hidden;box-shadow:var(--shadow)}
+.ac-list.open{display:flex}
+.ac-list button{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-top:1px solid var(--line)}
+.ac-list button:first-child{border-top:0}
+.ac-list button span{flex:1;min-width:0}
+.ac-list b{display:block;font-weight:700}
+.ac-list small{display:block;color:var(--ink-2);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-list i{font-style:normal;font-size:11px;font-weight:700;color:var(--ink-2);background:var(--cream-2);border-radius:999px;padding:2px 8px;flex:none}
+.ac-msg{padding:10px 12px;font-size:13px;color:var(--ink-2)}
 
 /* bucket */
 .ask{font-family:var(--f-display);font-weight:500;font-size:24px;text-align:center;margin:8px 0 18px}
@@ -1103,8 +1113,6 @@ function pinField(it){
 }
 function flowDetails(){
   const it=flow.item; const c=CAT[it.cat]; const p=profile(it.profileId);
-  const pastPlaces=[...new Set(Object.values(S.items).filter(i=>i.cat===it.cat).map(i=>i.place))].sort();
-  const pastAreas=[...areaNames(Object.values(S.items)).values()].sort();
   const pastStyles=Object.values(S.items).filter(i=>i.cat===it.cat && i.style).map(i=>i.style);
   const styles=[...new Set([...c.styles, ...pastStyles])];
   const others=S.profiles.filter(x=>x.id!==it.profileId);
@@ -1113,8 +1121,8 @@ function flowDetails(){
   <div class="sheet-body">
     ${flow.error?`<div class="err"><span>${flow.error}</span>${flow.dupId?`<button class="small-btn" data-a="rerank" data-id="${flow.dupId}">Re-rank that one instead</button>`:''}</div>`:''}
     <div class="field"><span class="lab">What did ${others.length?esc(p.name):'you'} eat?</span><div class="catgrid">${CATS.map(x=>`<button class="ctile ${x.k===it.cat?'on':''}" style="--cc:${x.color};--ct:${x.text}" data-a="f-cat" data-cat="${x.k}" ${edit?'disabled':''}><span class="e">${foodIcon(x.k)}</span>${x.name}</button>`).join('')}</div>${edit?'<span class="opt">To move it to another food, delete it and rank it again.</span>':''}</div>
-    <div class="field"><label for="f-place">Place</label><input id="f-place" class="input" data-f="place" list="dl-places" value="${esc(it.place)}" placeholder="e.g. Smash Shack" autocomplete="off" maxlength="60"><datalist id="dl-places">${pastPlaces.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></div>
-    <div class="field"><label for="f-loc">Location <span class="opt">city or neighborhood, used for Areas</span></label><input id="f-loc" class="input" data-f="location" list="dl-areas" value="${esc(it.location)}" placeholder="e.g. Royal Oak" autocomplete="off" maxlength="40"><datalist id="dl-areas">${pastAreas.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></div>
+    <div class="field"><label for="f-loc">Location <span class="opt">city or neighborhood, used for Areas</span></label><div class="ac"><input id="f-loc" class="input" data-f="location" data-ac="loc" value="${esc(it.location)}" placeholder="Start typing a city" autocomplete="off" maxlength="40" role="combobox" aria-autocomplete="list" aria-controls="ac-loc"><div class="ac-list" id="ac-loc" role="listbox"></div></div></div>
+    <div class="field"><label for="f-place">Place</label><div class="ac"><input id="f-place" class="input" data-f="place" data-ac="place" value="${esc(it.place)}" placeholder="${IN_CLAUDE?'e.g. Smash Shack':'Start typing a restaurant name'}" autocomplete="off" maxlength="60" role="combobox" aria-autocomplete="list" aria-controls="ac-place"><div class="ac-list" id="ac-place" role="listbox"></div></div></div>
     ${pinField(it)}
     <div class="field"><label for="f-dish">Dish name <span class="opt">optional, for a second item from the same place</span></label><input id="f-dish" class="input" data-f="dish" value="${esc(it.dish)}" placeholder="e.g. Double smash w/ onions" autocomplete="off" maxlength="60"></div>
     <div class="field"><label for="f-style">Style <span class="opt">a label for reference, never ranked separately</span></label>
@@ -1252,8 +1260,108 @@ function geoHere(){
     }catch(e){}
     renderSheet();
     if(flow.item.place.trim()) geoSearch(); // suggest the restaurant itself, biased to here
+    else nearbyPlaces(lat,lng);
   }, ()=>{ if(!flow) return; syncForm(); flow.geoMsg='Location permission was denied. Turn it on in your browser settings, or use Find this place.'; renderSheet(); }, {enableHighAccuracy:true, timeout:12000, maximumAge:30000});
 }
+
+/* ---- type-ahead for Location (towns and cities) and Place (restaurants) ----
+   Photon (photon.komoot.io) is a free OpenStreetMap search built for as-you-type lookups.
+   Overpass lists named food spots around you for "I'm here now". Hosted version only. */
+const PHOTON='https://photon.komoot.io/api/';
+const FOOD_TAGS=['restaurant','fast_food','cafe','bar','pub','food_court','biergarten'];
+const ac={place:{list:[], seq:0, timer:null}, loc:{list:[], seq:0, timer:null}};
+function photonPlace(f){
+  const p=f.properties||{}; const [lng,lat]=f.geometry?.coordinates||[];
+  const street=[p.housenumber,p.street].filter(Boolean).join(' ');
+  const city=p.city||p.town||p.village||p.district||p.locality||(p.type==='city'?p.name:'')||'';
+  return {p, lat:+(+lat).toFixed(5), lng:+(+lng).toFixed(5), street, city, state:p.state||'', country:p.countrycode||''};
+}
+function acCenter(){
+  if(flow?.locGeo) return flow.locGeo;
+  if(flow?.here) return flow.here;
+  if(hasPin(flow.item)) return {lat:flow.item.lat, lng:flow.item.lng};
+  const last=Object.values(S.items).filter(hasPin).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0];
+  return last? {lat:last.lat, lng:last.lng} : null;
+}
+function acPast(kind, q){
+  const n=norm(q);
+  const all = kind==='loc' ? [...areaNames(Object.values(S.items)).values()]
+    : [...new Map(Object.values(S.items).map(i=>[norm(i.place), i])).values()];
+  return all.filter(x=>{ const name=kind==='loc'?x:x.place; return !n || norm(name).includes(n); }).slice(0, n?4:5)
+    .map(x=> kind==='loc' ? {kind:'past', name:x, sub:'Used before'} : {kind:'past', name:x.place, sub:[x.address||x.location, 'You ranked here'].filter(Boolean).join(' · '), item:x});
+}
+function acRender(kind, msg){
+  const box=document.getElementById('ac-'+kind); if(!box) return;
+  const list=ac[kind].list;
+  if(!list.length && !msg){ box.classList.remove('open'); box.innerHTML=''; return; }
+  box.innerHTML=list.map((r,i)=>`<button type="button" role="option" data-a="ac-pick" data-k="${kind}" data-i="${i}"><span><b>${esc(r.name)}</b>${r.sub?`<small>${esc(r.sub)}</small>`:''}</span>${r.tag?`<i>${esc(r.tag)}</i>`:''}</button>`).join('')+(msg?`<div class="ac-msg">${esc(msg)}</div>`:'');
+  box.classList.add('open');
+}
+function acInput(kind, typed){
+  const el=document.getElementById(kind==='loc'?'f-loc':'f-place'); if(!el || !flow) return;
+  const q=el.value.trim(); const st=ac[kind];
+  if(kind==='loc' && typed) flow.locGeo=null;
+  st.list=acPast(kind,q); acRender(kind);
+  clearTimeout(st.timer);
+  if(IN_CLAUDE || q.length<2) return;
+  st.timer=setTimeout(()=>acFetch(kind,q), 280);
+}
+async function acFetch(kind, q){
+  const st=ac[kind]; const seq=++st.seq;
+  const params=new URLSearchParams({q, limit: kind==='loc'?'8':'10', lang:'en'});
+  const c=acCenter();
+  if(kind==='loc'){ ['city','town','village','suburb','neighbourhood','quarter','hamlet'].forEach(v=>params.append('osm_tag','place:'+v)); }
+  else { FOOD_TAGS.forEach(v=>params.append('osm_tag','amenity:'+v)); }
+  if(c){ params.set('lat',c.lat); params.set('lon',c.lng); params.set('location_bias_scale', kind==='loc'?'0.3':'0.6'); params.set('zoom', kind==='loc'?'8':'12'); }
+  if(kind==='place' && flow.locGeo){ const {lat,lng}=flow.locGeo; params.set('bbox',[lng-.35,lat-.25,lng+.35,lat+.25].join(',')); }
+  try{
+    const r=await fetch(PHOTON+'?'+params, {headers:{Accept:'application/json'}}); if(!r.ok) throw 0;
+    const j=await r.json(); if(seq!==st.seq || !flow) return;
+    const seen=new Set(st.list.map(x=>norm(x.name)+'|'+norm(x.sub)));
+    let rows=(j.features||[]).map(photonPlace).filter(x=>x.p.name).map(x=>{
+      if(kind==='loc'){ const sub=[x.p.county&&x.p.county!==x.p.name?x.p.county:'', x.state, x.country&&x.country!=='US'?x.country:''].filter(Boolean).join(', ');
+        return {kind:'geo', name:x.p.name, sub, lat:x.lat, lng:x.lng, us:x.country==='US'}; }
+      const sub=[x.street, x.city, x.state].filter(Boolean).join(', ');
+      const tag={fast_food:'Fast food', cafe:'Cafe', bar:'Bar', pub:'Pub', food_court:'Food court', biergarten:'Beer garden'}[x.p.osm_value]||'';
+      return {kind:'geo', name:x.p.name, sub, tag, lat:x.lat, lng:x.lng, city:x.city, addr:[x.street, x.city, x.state].filter(Boolean).join(', '), us:x.country==='US'};
+    });
+    if(kind==='loc') rows.sort((a,b)=>(b.us?1:0)-(a.us?1:0));
+    rows=rows.filter(x=>{ const k=norm(x.name)+'|'+norm(x.sub); if(seen.has(k)) return false; seen.add(k); return true; });
+    st.list=[...st.list, ...rows].slice(0,10);
+    const el=document.getElementById(kind==='loc'?'f-loc':'f-place');
+    if(document.activeElement===el) acRender(kind, st.list.length?'':(kind==='place'?'No restaurants found. Keep typing, or set the Location first.':'No towns found.'));
+  }catch(e){ if(seq===st.seq) acRender(kind, st.list.length?'':"Search isn't reachable right now. You can still type it in."); }
+}
+function acPick(kind, i){
+  const r=ac[kind].list[i]; if(!r || !flow) return;
+  const it=flow.item;
+  if(kind==='loc'){ it.location=r.name; if(r.lat!=null) flow.locGeo={lat:r.lat, lng:r.lng}; }
+  else {
+    it.place=r.name;
+    if(r.kind==='geo'){ Object.assign(it,{lat:r.lat, lng:r.lng, address:r.addr||r.name}); if(!it.location.trim() && r.city) it.location=r.city; flow.geoMsg=''; flow.geoResults=[]; }
+    else if(r.item){ if(!hasPin(it) && hasPin(r.item)) Object.assign(it,{lat:r.item.lat, lng:r.item.lng, address:r.item.address}); if(!it.location.trim() && r.item.location) it.location=r.item.location; }
+  }
+  ac[kind].list=[]; renderSheet();
+  if(kind==='loc') setTimeout(()=>{ const el=$('#f-place'); if(el && !el.value) el.focus(); },50);
+}
+async function nearbyPlaces(lat,lng){
+  const q=`[out:json][timeout:15];nwr(around:350,${lat},${lng})["amenity"~"^(${FOOD_TAGS.join('|')})$"]["name"];out center 40;`;
+  try{
+    const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST', body:'data='+encodeURIComponent(q), headers:{'Content-Type':'application/x-www-form-urlencoded'}}); if(!r.ok) throw 0;
+    const j=await r.json(); if(!flow) return;
+    const d2=(a,b)=>{ const x=(b.lng-a.lng)*Math.cos(a.lat*Math.PI/180), y=b.lat-a.lat; return x*x+y*y; };
+    const rows=(j.elements||[]).map(e=>{ const t=e.tags||{}; const la=e.lat??e.center?.lat, lo=e.lon??e.center?.lon;
+      const street=[t['addr:housenumber'],t['addr:street']].filter(Boolean).join(' ');
+      return {name:t.name, lat:+(+la).toFixed(5), lng:+(+lo).toFixed(5), addr:[street, t['addr:city']].filter(Boolean).join(', ')||'Near you', area:t['addr:city']||'', setName:true}; })
+      .filter(x=>x.name && !isNaN(x.lat)).sort((a,b)=>d2({lat,lng},a)-d2({lat,lng},b)).slice(0,8);
+    if(!rows.length) return;
+    syncForm(); flow.geoResults=rows; flow.geoMsg='Pinned to where you are. Eating at one of these?'; renderSheet();
+  }catch(e){}
+}
+document.addEventListener('input', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k, true); });
+document.addEventListener('focusin', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k); });
+document.addEventListener('focusout', e=>{ const k=e.target.dataset?.ac; if(k) setTimeout(()=>{ const el=document.getElementById(k==='loc'?'f-loc':'f-place'); if(el && document.activeElement!==el){ ac[k].list=[]; acRender(k); } },250); });
+document.addEventListener('keydown', e=>{ const k=e.target.dataset?.ac; if(k && e.key==='Enter' && ac[k].list.length){ e.preventDefault(); syncForm(); acPick(k,0); } });
 
 /* ============ render ============ */
 function renderSheet(){
@@ -1407,7 +1515,8 @@ document.addEventListener('click', e=>{
     case 'f-nophoto': flow.item.photo=null; renderSheet(); break;
     case 'geo-search': geoSearch(); break;
     case 'geo-here': geoHere(); break;
-    case 'geo-pick': { const g=flow.geoResults[+d.i]; Object.assign(flow.item,{lat:g.lat, lng:g.lng, address:g.addr}); if(!flow.item.location.trim() && g.area) flow.item.location=g.area; flow.geoResults=[]; flow.geoMsg=''; renderSheet(); } break;
+    case 'geo-pick': { const g=flow.geoResults[+d.i]; Object.assign(flow.item,{lat:g.lat, lng:g.lng, address:g.addr}); if(g.setName) flow.item.place=g.name; if(!flow.item.location.trim() && g.area) flow.item.location=g.area; flow.geoResults=[]; flow.geoMsg=''; renderSheet(); } break;
+    case 'ac-pick': acPick(d.k, +d.i); break;
     case 'geo-clear': Object.assign(flow.item,{lat:null,lng:null,address:''}); renderSheet(); break;
     case 'flow-next': case 'flow-save': {
       const it=flow.item; it.place=it.place.trim(); it.dish=it.dish.trim(); it.style=it.style.trim(); it.location=it.location.trim();
