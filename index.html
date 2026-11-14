@@ -321,7 +321,7 @@ const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.
 /* Shared crews (hosted version only). Paste apiKey and projectId from Firebase console →
    Project settings → Your apps → SDK setup and configuration. Both are safe to publish:
    the security rules (firebase/firestore.rules) only open a crew to its name + passcode. */
-const FIREBASE = { apiKey: '', projectId: '' };
+const FIREBASE = { apiKey: 'AIzaSyB5gmvZ7TtLcsduaDusNr632xakbJmP1cU', projectId: 'tummi-53588' };
 const FIRESTORE_HOST = 'https://firestore.googleapis.com';
 const CREW_ON = !IN_CLAUDE && !!FIREBASE.apiKey && !!FIREBASE.projectId;
 const LEAFLET_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
