@@ -1,0 +1,33 @@
+rules_version = '2';
+// Tummi crews. Paste this into Firebase console → Firestore Database → Rules → Publish.
+//
+// A crew lives at crews/{id}, where id is a SHA-256 hash of the crew name + passcode, worked out in
+// the app. Knowing the id is the passcode: nobody can list crews, so you can only reach a crew whose
+// name and passcode you know. names/{hash of name} just stops two crews taking the same name.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isKey(k) { return k is string && k.matches('^[0-9a-f]{64}$'); }
+
+    match /names/{name} {
+      allow get: if isKey(name);
+      allow create: if isKey(name) && request.resource.data.keys().hasOnly(['created']);
+    }
+
+    match /crews/{crew} {
+      allow get: if isKey(crew);
+      allow create: if isKey(crew) && request.resource.data.keys().hasOnly(['created']);
+
+      match /docs/{doc} {
+        allow get, list: if isKey(crew) && exists(/databases/$(database)/documents/crews/$(crew));
+        allow create, update: if isKey(crew)
+          && exists(/databases/$(database)/documents/crews/$(crew))
+          && doc.size() <= 120
+          && request.resource.data.keys().hasOnly(['data', 'deleted', 'updatedAt'])
+          && request.resource.data.data is string
+          && request.resource.data.data.size() < 1000000
+          && request.resource.data.deleted is bool
+          && request.resource.data.updatedAt == request.time;
+      }
+    }
+  }
+}

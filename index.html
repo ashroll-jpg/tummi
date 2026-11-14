@@ -318,11 +318,12 @@ textarea.input{min-height:84px;resize:vertical}
    but data syncs to the Claude account. Hosted on its own (e.g. GitHub Pages) everything works and
    data is kept on the device. */
 const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.claude; }catch(e){ return true; } })();
-/* Shared crews (hosted version only). Fill these in from Supabase → Project Settings → API.
-   Both values are safe to publish: the database only answers to a crew name + passcode. */
-const SUPABASE_URL = '';   // e.g. 'https://abcdefgh.supabase.co'
-const SUPABASE_KEY = '';   // the "anon" / "publishable" key
-const CREW_ON = !IN_CLAUDE && !!SUPABASE_URL && !!SUPABASE_KEY;
+/* Shared crews (hosted version only). Paste apiKey and projectId from Firebase console →
+   Project settings → Your apps → SDK setup and configuration. Both are safe to publish:
+   the security rules (firebase/firestore.rules) only open a crew to its name + passcode. */
+const FIREBASE = { apiKey: '', projectId: '' };
+const FIRESTORE_HOST = 'https://firestore.googleapis.com';
+const CREW_ON = !IN_CLAUDE && !!FIREBASE.apiKey && !!FIREBASE.projectId;
 const LEAFLET_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
 const LEAFLET_CSS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
 
@@ -529,7 +530,8 @@ async function connectRemote(){
 }
 
 /* ============ shared crew (hosted version) ============
-   Everyone in a crew shares one set of profiles and rankings through Supabase.
+   Everyone in a crew shares one set of profiles and rankings through Firebase Firestore.
+   The crew's id is a SHA-256 of its name + passcode, so only people who know both can reach it.
    Docs: profile_<id>, orders_<profileId>, item_<id>. Which profile you are stays on the device.
    crewSync.h remembers a hash of each doc as last agreed with the server, so we only send what
    changed here and only take remote changes for docs we haven't edited since. */
@@ -537,15 +539,47 @@ let crew=null, crewSync=null, syncBusy=false, syncAgain=false, syncTimer=null, c
 try{ crew=CREW_ON ? JSON.parse(localStorage.getItem('tummi_crew')||'null') : null; }catch(_){ crew=null; }
 function saveCrew(){ try{ crew ? localStorage.setItem('tummi_crew', JSON.stringify(crew)) : localStorage.removeItem('tummi_crew'); }catch(_){} }
 function hashStr(str){ let h=5381; for(let i=0;i<str.length;i++) h=((h<<5)+h+str.charCodeAt(i))|0; return (h>>>0).toString(36)+'.'+str.length; }
-async function rpc(fn, args){
-  const headers={'Content-Type':'application/json', apikey:SUPABASE_KEY};
-  if(SUPABASE_KEY.startsWith('eyJ')) headers.Authorization='Bearer '+SUPABASE_KEY;
+const FS_ROOT = `projects/${FIREBASE.projectId}/databases/(default)/documents`;
+async function sha256hex(str){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+async function crewKeys(name, pass){ const n=name.trim().toLowerCase(); return {nameKey:await sha256hex('tummi-name|'+n), cid:await sha256hex('tummi-crew|'+n+'|'+pass)}; }
+async function fsReq(method, path, body){
+  const url=`${FIRESTORE_HOST}/v1/${FS_ROOT}${path}${path.includes('?')?'&':'?'}key=${encodeURIComponent(FIREBASE.apiKey)}`;
   let r;
-  try{ r=await fetch(SUPABASE_URL.replace(/\/+$/,'')+'/rest/v1/rpc/'+fn,{method:'POST', headers, body:JSON.stringify(args)}); }
+  try{ r=await fetch(url,{method, headers:body?{'Content-Type':'application/json'}:{}, body:body?JSON.stringify(body):undefined}); }
   catch(e){ const err=new Error("Can't reach the crew right now."); err.offline=true; throw err; }
-  const txt=await r.text(); let body=null; try{ body=txt?JSON.parse(txt):null; }catch(_){}
-  if(!r.ok){ const err=new Error((body&&body.message)||('Server error '+r.status)); err.code=body&&body.code; throw err; }
-  return body;
+  const txt=await r.text(); let res=null; try{ res=txt?JSON.parse(txt):null; }catch(_){}
+  if(!r.ok){ const e0=(Array.isArray(res)?res[0]:res)?.error||{}; const err=new Error(e0.message||('Server error '+r.status)); err.status=e0.status||String(r.status); throw err; }
+  return res;
+}
+const fsExists=path=>fsReq('GET',path).then(()=>true, e=>{ if(e.status==='NOT_FOUND') return false; throw e; });
+const fsCreate=(coll,id)=>fsReq('POST',`/${coll}?documentId=${id}`,{fields:{created:{timestampValue:new Date().toISOString()}}});
+async function crewOpen(name, pass, create){
+  const {nameKey, cid}=await crewKeys(name, pass);
+  if(await fsExists('/crews/'+cid)) return cid;              // right name + passcode, whichever button was tapped
+  if(!create){ const err=new Error('Wrong crew name or passcode.'); err.code='badpass'; throw err; }
+  if(await fsExists('/names/'+nameKey)){ const err=new Error('That crew name is taken.'); err.code='taken'; throw err; }
+  await fsCreate('names', nameKey); await fsCreate('crews', cid);
+  return cid;
+}
+async function crewPull(cid, since){
+  const q={from:[{collectionId:'docs'}]};
+  if(since) q.where={fieldFilter:{field:{fieldPath:'updatedAt'}, op:'GREATER_THAN', value:{timestampValue:since}}};
+  const res=await fsReq('POST', `/crews/${cid}:runQuery`, {structuredQuery:q});
+  let now=null; const docs=[];
+  for(const row of res||[]){
+    if(row.readTime) now=row.readTime;
+    if(!row.document) continue;
+    const id=row.document.name.split('/').pop(); const f=row.document.fields||{};
+    const del=!!f.deleted?.booleanValue; if(del && !since) continue;
+    let data=null; if(!del){ try{ data=JSON.parse(f.data?.stringValue||'null'); }catch(_){ continue; } if(!data) continue; }
+    docs.push({id, data});
+  }
+  return {now:(now||new Date().toISOString()).replace(/(\.\d{3})\d*Z$/,'$1Z'), docs};
+}
+function crewPush(cid, docs){
+  return fsReq('POST', ':commit', {writes:docs.map(d=>({
+    update:{name:`${FS_ROOT}/crews/${cid}/docs/${d.id}`, fields:{data:{stringValue:d.data?JSON.stringify(d.data):''}, deleted:{booleanValue:!d.data}}},
+    updateTransforms:[{fieldPath:'updatedAt', setToServerValue:'REQUEST_TIME'}]}))});
 }
 function crewDocs(){
   const out={};
@@ -585,14 +619,14 @@ async function syncNow(){
     for(const [id,doc] of Object.entries(cur)){ const str=JSON.stringify(doc); const hs=hashStr(str); if(h[id]!==hs) out.push({id, data:doc, hs, size:str.length}); }
     for(const id of Object.keys(h)) if(!(id in cur)) out.push({id, data:null, hs:null, size:20});
     let batch=[], size=0;
-    const flush=async()=>{ if(!batch.length) return; await rpc('tummi_push',{p_code:crew.code, p_pass:crew.pass, p_docs:batch.map(d=>({id:d.id, data:d.data}))});
+    const flush=async()=>{ if(!batch.length) return; await crewPush(crew.cid, batch);
       batch.forEach(d=>{ d.hs ? (h[d.id]=d.hs) : delete h[d.id]; }); batch=[]; size=0; };
-    for(const d of out){ if(size+d.size>1500000) await flush(); batch.push(d); size+=d.size; }
+    for(const d of out){ if(size+d.size>1500000 || batch.length>=400) await flush(); batch.push(d); size+=d.size; }
     await flush();
     // pull what others changed (not while a sheet is open, so nothing moves under you)
     if(!ui.sheet){
       const since=crewSync.cursor ? new Date(new Date(crewSync.cursor).getTime()-15000).toISOString() : null;
-      const res=await rpc('tummi_pull',{p_code:crew.code, p_pass:crew.pass, p_since:since});
+      const res=await crewPull(crew.cid, since);
       const now=crewDocs(); let changed=false;
       for(const {id,data} of res.docs||[]){
         const local=now[id]? hashStr(JSON.stringify(now[id])) : undefined;
@@ -611,7 +645,7 @@ async function syncNow(){
     }
     crewErr=''; lastSyncAt=Date.now(); syncMode='crew';
   }catch(e){
-    if(e.code==='28P01'){ crewErr='The crew passcode no longer works. Leave the crew and join again.'; }
+    if(e.status==='PERMISSION_DENIED'){ crewErr='The crew passcode no longer works. Leave the crew and join again.'; }
     else crewErr=e.offline ? "Can't reach the crew. Changes are saved here and will sync later." : 'Sync hiccup: '+e.message;
     syncMode='crew-err';
   }finally{
@@ -621,8 +655,8 @@ async function syncNow(){
   }
 }
 async function joinCrew(code, pass, create, bring){
-  await rpc('tummi_join',{p_code:code, p_pass:pass, p_create:create});
-  const res=await rpc('tummi_pull',{p_code:code, p_pass:pass, p_since:null});
+  const cid=await crewOpen(code, pass, create);
+  const res=await crewPull(cid, null);
   const remoteDocs=res.docs||[];
   const mine= bring ? (stripDemo(), clone(S)) : null;
   const myActive=activeProfile();
@@ -645,7 +679,7 @@ async function joinCrew(code, pass, create, bring){
     }
     me=map[mine.activeId]||null;
   }
-  crew={code:code.trim().toLowerCase(), name:code.trim(), pass};
+  crew={name:code.trim(), cid};
   saveCrew();
   let fresh=false;
   if(!S.profiles.length){ S.profiles=[{id:'p_'+uid(), name:(myActive&&!myActive.demo&&myActive.name)||'Me', color:(myActive&&myActive.color)||P_COLORS[0]}]; fresh=true; }
@@ -1319,7 +1353,7 @@ document.addEventListener('click', e=>{
         else if(!r.picked){ ui.sheet={type:'switcher'}; render(); toast("You're in. Pick yourself, or tap Add a friend to add you."); }
         else { ui.sheet=null; render(); toast("You're in the crew"); }
       }).catch(e=>{ sh.busy=false;
-        sh.error = e.offline ? "Can't reach the crew server. Check your connection." : e.code==='28P01' ? 'Wrong crew name or passcode.' : e.code==='23505' ? 'That crew name is taken. Pick another, or switch to Join.' : e.message;
+        sh.error = e.offline ? "Can't reach the crew server. Check your connection." : e.code==='badpass' ? 'Wrong crew name or passcode.' : e.code==='taken' ? 'That crew name is taken. Pick another, or switch to Join.' : e.message;
         if(ui.sheet===sh) renderSheet(); });
     } break;
     case 'crew-sync': syncNow(); toast('Syncing…'); break;
