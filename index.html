@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="Tummi">
 <title>Tummi</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" type="image/png" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -244,6 +247,70 @@ textarea.input{min-height:84px;resize:vertical}
 .geo-results button{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
 .geo-results b{display:block}
 .geo-results small{color:var(--ink-2);font-size:12.5px}
+.cat.add{color:var(--ink-2);border-style:dashed}
+.list-tools{display:flex;gap:6px;align-items:center}
+.want-row{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border-radius:var(--r-md);padding:8px 10px;box-shadow:var(--shadow);border:1.5px dashed var(--line)}
+.want-row .star{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb, var(--cc) 14%, var(--card));color:var(--cc);font-size:20px}
+.want-row .name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.want-row .sub{display:flex;gap:8px;align-items:center;color:var(--ink-2);font-size:13px;margin-top:2px;min-width:0}
+.want-row .sub span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.want-n{font-size:12px;font-weight:800;color:var(--ink-2);background:var(--cream-2);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.pin.want{background:var(--card);border:3px dashed var(--grape)}
+.pin.want span{color:var(--grape);font-size:17px}
+.reacts{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px}
+.react{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);font-size:17px;line-height:1}
+.react b{font-size:13px;font-weight:800;color:var(--ink-2)}
+.react.on{border-color:var(--ink);background:var(--cream-2)}
+.comments{display:flex;flex-direction:column;gap:10px;margin:8px 0 12px}
+.cmt{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start}
+.cmt .bub{background:var(--card);border-radius:4px 14px 14px 14px;padding:8px 11px;font-size:14.5px;line-height:1.35;box-shadow:var(--shadow);overflow-wrap:anywhere}
+.cmt .cwho{font-size:12px;font-weight:800;color:var(--ink-2);margin-bottom:2px;display:flex;gap:8px;align-items:center}
+.cmt .cwho button{font-size:11px;font-weight:700;color:var(--burger-ink)}
+.cbox{display:flex;gap:8px;align-items:flex-end;margin-bottom:16px}
+.cbox textarea{flex:1;min-height:44px;max-height:120px;resize:none}
+.seg.five button{font-size:12.5px;padding:9px 2px}
+.tab{position:relative}
+.badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:999px;background:var(--burger);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--card)}
+.feed{display:flex;flex-direction:column;gap:8px}
+.day{font-size:12px;font-weight:800;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;margin:12px 4px 2px}
+.ev{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border-radius:var(--r-md);padding:10px;box-shadow:var(--shadow);position:relative}
+.ev.new::before{content:'';position:absolute;left:-4px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--burger)}
+.ev .txt{font-size:14.5px;line-height:1.35}
+.ev .txt b{font-weight:800}
+.ev .meta2{font-size:12.5px;color:var(--ink-2);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+.ev .quote{font-size:13.5px;color:var(--ink-2);margin-top:3px;font-style:italic;overflow-wrap:anywhere}
+.hero-card{background:var(--ink);color:var(--cream);border-radius:var(--r-lg);padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;width:100%;text-align:left}
+.hero-card .big{font-size:30px}
+.hero-card h3{color:var(--cream);font-size:18px}
+.hero-card p{margin:2px 0 0;font-size:13.5px;opacity:.8}
+.who-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.who{display:flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border-radius:999px;background:var(--card);border:2px solid var(--line);font-weight:700;font-size:14px}
+.who.on{border-color:var(--ink);background:var(--cream-2)}
+.who:not(.on) .av{filter:grayscale(1);opacity:.5}
+.pick-card{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:14px;border-left:5px solid var(--bc)}
+.pick-card .name{font-family:var(--f-display);font-size:20px;font-weight:500}
+.pick-card .why{font-size:13.5px;color:var(--ink-2);margin-top:4px;line-height:1.35}
+.pick-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border-radius:var(--r-md);padding:10px 12px;box-shadow:var(--shadow);border-left:4px solid var(--bc)}
+.pick-row .name{font-weight:700}
+.pick-row .why{font-size:12.5px;color:var(--ink-2);margin-top:2px;line-height:1.3}
+.skip{font-size:13px;color:var(--ink-2);line-height:1.5}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--card);border-radius:var(--r-md);padding:12px;box-shadow:var(--shadow)}
+.stat .v{font-family:var(--f-display);font-size:30px;font-weight:600;line-height:1.05}
+.stat .l{font-size:12.5px;color:var(--ink-2);font-weight:700;margin-top:2px}
+.hl{background:var(--card);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--shadow);display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center}
+.hl .k{font-size:12px;font-weight:800;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em}
+.hl .t{font-weight:700;font-size:15.5px;margin-top:1px}
+.hl .s{font-size:12.5px;color:var(--ink-2)}
+.hl .e{font-size:24px;text-align:center}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:90px 1fr 28px;gap:8px;align-items:center;font-size:13px;font-weight:700}
+.bar i{display:block;height:12px;border-radius:999px;background:var(--cc)}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.emoji-grid button{font-size:22px;padding:6px 0;border-radius:10px;border:2px solid transparent}
+.emoji-grid button.on{border-color:var(--ink);background:var(--cream-2)}
+.install{display:flex;gap:10px;align-items:center;background:var(--cream-2);border-radius:var(--r-md);padding:10px 12px;margin-bottom:14px;font-size:13.5px;line-height:1.35}
+.install p{margin:0;flex:1}
 .ac{position:relative}
 .ac-list{display:none;flex-direction:column;margin-top:6px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);overflow:hidden;box-shadow:var(--shadow)}
 .ac-list.open{display:flex}
@@ -338,14 +405,23 @@ const LEAFLET_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.m
 const LEAFLET_CSS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
 
 /* ============ constants ============ */
-const CATS = [
+const BASE_CATS = [
   {k:'burger', name:'Burgers', one:'burger', emoji:'🍔', color:'var(--burger)', text:'#fff', styles:['Smash','Pub','Diner','Gourmet','Double','Veggie']},
   {k:'pizza',  name:'Pizza',   one:'pizza',  emoji:'🍕', color:'var(--pizza)',  text:'#2A1C12', styles:['NY','Detroit','Neapolitan','Chicago deep dish','Tavern','Sicilian','Grandma']},
   {k:'tacos',  name:'Tacos',   one:'taco',   emoji:'🌮', color:'var(--tacos)',  text:'#fff', styles:['Al pastor','Birria','Carnitas','Asada','Fish','Chicken']},
   {k:'wings',  name:'Wings',   one:'wing order', emoji:'🍗', color:'var(--wings)', text:'#fff', styles:['Buffalo','Dry rub','BBQ','Garlic parm','Korean','Lemon pepper']},
   {k:'steak',  name:'Steaks',  one:'steak',  emoji:'🥩', color:'var(--steak)',  text:'#fff', styles:['Ribeye','NY strip','Filet','Porterhouse','Sirloin','Tomahawk','Skirt']},
 ];
+const CATS = [...BASE_CATS];
 const CAT = Object.fromEntries(CATS.map(c=>[c.k,c]));
+function inkFor(hex){ const m=/^#?([0-9a-f]{6})$/i.exec(hex||''); if(!m) return '#fff'; const n=parseInt(m[1],16); const r=n>>16, g=(n>>8)&255, b=n&255; return (0.299*r+0.587*g+0.114*b)>165 ? '#2A1C12' : '#fff'; }
+function rebuildCats(){
+  const custom=Object.values(S.cats||{}).filter(c=>c && c.k && c.name).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))
+    .map(c=>({styles:[], ...c, one:c.one||c.name.toLowerCase(), text:inkFor(c.color), custom:true}));
+  CATS.length=0; CATS.push(...BASE_CATS, ...custom);
+  for(const k of Object.keys(CAT)) delete CAT[k];
+  for(const c of CATS) CAT[c.k]=c;
+}
 const BUCKETS = [
   {k:'liked',    label:'I liked it',     emoji:'😍', lo:6.7, hi:10,  color:'var(--liked)',    text:'#fff'},
   {k:'fine',     label:'It was fine',    emoji:'🙂', lo:3.4, hi:6.6, color:'var(--fine)',     text:'#2A1C12'},
@@ -369,7 +445,8 @@ const FACE = {
   fine:     svgI('<circle cx="12" cy="12" r="9"/><path d="M8.5 15h7"/><path d="M9 9.5v.5M15 9.5v.5" stroke-width="2.4"/>'),
   disliked: svgI('<circle cx="12" cy="12" r="9"/><path d="M8 16c1-1.4 2.4-2.1 4-2.1s3 .7 4 2.1"/><path d="M9 9.5v.5M15 9.5v.5" stroke-width="2.4"/>'),
 };
-const foodIcon = k => FOOD_ICON[k] || FOOD_ICON.all;
+const emojiIcon = e => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="19" text-anchor="middle" font-size="18">${esc(e)}</text></svg>`;
+const foodIcon = k => FOOD_ICON[k] || (CAT[k]?.emoji ? emojiIcon(CAT[k].emoji) : FOOD_ICON.all);
 
 const ic = {
   list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor"/></svg>',
@@ -399,11 +476,14 @@ function bucketForScore(s){ return s>=6.7?BUCKET.liked:s>=3.4?BUCKET.fine:BUCKET
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
 
 /* ============ state ============ */
-let S = { profiles:[], activeId:null, orders:{}, items:{} };
+let S = { profiles:[], activeId:null, orders:{}, items:{}, wants:{}, reacts:{}, comments:{}, cats:{} };
+function ensureS(){ S.orders??={}; S.items??={}; S.wants??={}; S.reacts??={}; S.comments??={}; S.cats??={}; }
+const extraObj = () => ({wants:S.wants, reacts:S.reacts, comments:S.comments, cats:S.cats});
 const ui = { tab:'lists', cat:'burger', style:'all', area:'',
   areaScope:'me', areaCat:'all', areaMin:false,
   mapScope:'me', mapCat:'all', mapFit:true, mapFocus:null,
-  crew:'board', cmpA:null, cmpB:null, cmpCat:'burger', groupCat:'burger', groupMin2:false,
+  crew:'feed', pickWho:null, pickCat:'all', pickArea:'', pickSurprise:null, mapWants:true, recapYear:null,
+  cmpA:null, cmpB:null, cmpCat:'burger', groupCat:'burger', groupMin2:false,
   sheet:null, flash:null };
 let flow = null;
 let persisted = false;
@@ -480,7 +560,7 @@ let saveTimer=null;
 function saveLocal(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(async ()=>{
-    const snap={meta:clone(metaObj()), items:clone(S.items), sync:crewSync?clone(crewSync):null};
+    const snap={meta:clone(metaObj()), items:clone(S.items), extra:clone(extraObj()), sync:crewSync?clone(crewSync):null};
     try{ await idb.set('state', snap); try{ localStorage.removeItem(LS_KEY); }catch(_){} return; }catch(e){}
     try{ localStorage.setItem(LS_KEY, JSON.stringify(snap)); }
     catch(e){ try{ const lite={}; for(const [k,v] of Object.entries(snap.items)) lite[k]={...v, photo:null}; localStorage.setItem(LS_KEY, JSON.stringify({meta:snap.meta, items:lite})); toast('Storage is full, so photos were not saved.'); }catch(_){} }
@@ -493,7 +573,7 @@ async function loadLocal(){
   if(!d || !d.meta || !d.meta.profiles?.length) return false;
   applySnapshot(d); crewSync=d.sync||null; return true;
 }
-function applySnapshot(d){ S={profiles:d.meta.profiles, activeId:d.meta.activeId, orders:d.meta.orders||{}, items:d.items||{}}; }
+function applySnapshot(d){ const x=d.extra||{}; S={profiles:d.meta.profiles, activeId:d.meta.activeId, orders:d.meta.orders||{}, items:d.items||{}, wants:x.wants||{}, reacts:x.reacts||{}, comments:x.comments||{}, cats:x.cats||{}}; rebuildCats(); }
 
 let remote=null; const queues={}; let metaTimer=null;
 function enqueue(key, fn){
@@ -601,6 +681,11 @@ function crewDocs(){
     out['orders_'+pid]=c;
   }
   for(const it of Object.values(S.items)) if(!it.demo) out['item_'+it.id]=it;
+  ensureS();
+  for(const [k,v] of Object.entries(S.wants)) out['want_'+k]=v;
+  for(const [k,v] of Object.entries(S.reacts)) if(!S.items[v.itemId]?.demo) out['react_'+k]=v;
+  for(const [k,v] of Object.entries(S.comments)) if(!S.items[v.itemId]?.demo) out['comment_'+k]=v;
+  for(const [k,v] of Object.entries(S.cats)) out['cat_'+k]=v;
   return out;
 }
 function applyDoc(id, data){
@@ -608,6 +693,11 @@ function applyDoc(id, data){
     if(data){ i>=0 ? (S.profiles[i]=clone(data)) : S.profiles.push(clone(data)); } else if(i>=0) S.profiles.splice(i,1); }
   else if(id.startsWith('orders_')){ const pid=id.slice(7); if(data) S.orders[pid]=clone(data); else delete S.orders[pid]; }
   else if(id.startsWith('item_')){ const iid=id.slice(5); if(data) S.items[iid]=clone(data); else delete S.items[iid]; }
+  else { ensureS();
+    const m=/^(want|react|comment|cat)_(.+)$/.exec(id); if(!m) return;
+    const coll={want:S.wants, react:S.reacts, comment:S.comments, cat:S.cats}[m[1]];
+    if(data) coll[m[2]]=clone(data); else delete coll[m[2]];
+    if(m[1]==='cat') rebuildCats(); }
 }
 function stripDemo(){
   for(const it of Object.values(S.items)) if(it.demo) delete S.items[it.id];
@@ -634,7 +724,8 @@ async function syncNow(){
     for(const d of out){ if(size+d.size>1500000 || batch.length>=400) await flush(); batch.push(d); size+=d.size; }
     await flush();
     // pull what others changed (not while a sheet is open, so nothing moves under you)
-    if(!ui.sheet){
+    const quietSheet=!ui.sheet || ['item','want','recap','switcher'].includes(ui.sheet.type);
+    if(quietSheet){
       const since=crewSync.cursor ? new Date(new Date(crewSync.cursor).getTime()-15000).toISOString() : null;
       const res=await crewPull(crew.cid, since);
       const now=crewDocs(); let changed=false;
@@ -650,7 +741,8 @@ async function syncNow(){
       if(changed){
         if(!S.profiles.length) S.profiles=[{id:'p_'+uid(), name:'Me', color:P_COLORS[0]}];
         if(!profile(S.activeId)) S.activeId=S.profiles[0].id;
-        if(!ui.sheet) renderMain();
+        renderMain();
+        if(ui.sheet && document.activeElement?.id!=='c-text') renderSheet();
       }
     }
     crewErr=''; lastSyncAt=Date.now(); syncMode='crew';
@@ -670,7 +762,7 @@ async function joinCrew(code, pass, create, bring){
   const remoteDocs=res.docs||[];
   const mine= bring ? (stripDemo(), clone(S)) : null;
   const myActive=activeProfile();
-  S={profiles:[], activeId:null, orders:{}, items:{}};
+  S={profiles:[], activeId:null, orders:{}, items:{}, wants:{}, reacts:{}, comments:{}, cats:{}};
   crewSync={cursor:res.now, h:{}};
   for(const {id,data} of remoteDocs){ if(!data) continue; applyDoc(id,data); crewSync.h[id]=hashStr(JSON.stringify(data)); }
   let me=null;
@@ -688,6 +780,12 @@ async function joinCrew(code, pass, create, bring){
       for(const [cat,bk] of Object.entries(o)){ for(const b of BUCKETS){ const dst=catOrder(to,cat)[b.k]; for(const id of bk[b.k]||[]) if(!dst.includes(id)) dst.push(id); } }
     }
     me=map[mine.activeId]||null;
+    const mp=x=>map[x]||x;
+    for(const w of Object.values(mine.wants||{})) S.wants[w.id]={...w, addedBy:mp(w.addedBy), wantIds:(w.wantIds||[]).map(mp)};
+    for(const c of Object.values(mine.comments||{})) S.comments[c.id]={...c, pid:mp(c.pid)};
+    for(const r of Object.values(mine.reacts||{})){ const pid=mp(r.pid); S.reacts[r.itemId+'__'+pid]={...r, pid}; }
+    for(const c of Object.values(mine.cats||{})) if(!S.cats[c.k]) S.cats[c.k]=c;
+    rebuildCats();
   }
   crew={name:code.trim(), cid};
   saveCrew();
@@ -709,7 +807,7 @@ function leaveCrew(){ crew=null; crewSync=null; crewErr=''; saveCrew(); syncMode
 
 /* ============ backup (hosted version) ============ */
 function exportBackup(){
-  const blob=new Blob([JSON.stringify({app:'tummi', exported:new Date().toISOString(), meta:metaObj(), items:S.items})],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({app:'tummi', exported:new Date().toISOString(), meta:metaObj(), items:S.items, extra:extraObj()})],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`tummi-backup-${today()}.json`;
   document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
 }
@@ -795,19 +893,30 @@ function thumb(it){ const c=CAT[it.cat]; return `<div class="thumb" style="--cc:
 function catTag(c){ return `<span class="tag" style="--cc:${c.color}">${foodIcon(c.k)}${c.name}</span>`; }
 function catTabs(current, action, counts, withAll){
   const all = withAll? `<button class="cat ${current==='all'?'on':''}" style="--cc:var(--ink);--ct:var(--cream)" data-a="${action}" data-cat="all"><span class="e" style="--cc:currentColor">${FOOD_ICON.all}</span>All foods</button>` : '';
-  return `<div class="cats" role="tablist">${all}${CATS.map(c=>`<button class="cat ${c.k===current?'on':''}" role="tab" aria-selected="${c.k===current}" style="--cc:${c.color};--ct:${c.text}" data-a="${action}" data-cat="${c.k}"><span class="e">${foodIcon(c.k)}</span>${c.name}${counts?`<span class="n num">${counts[c.k]||0}</span>`:''}</button>`).join('')}</div>`;
+  const add = action==='set-cat' ? `<button class="cat add" data-a="cat-new" aria-label="Add a food category">${ic.plus.replace('<svg','<svg width="14" height="14"')}New</button>` : '';
+  return `<div class="cats" role="tablist">${all}${CATS.map(c=>`<button class="cat ${c.k===current?'on':''}" role="tab" aria-selected="${c.k===current}" style="--cc:${c.color};--ct:${c.text}" data-a="${action}" data-cat="${c.k}"><span class="e">${foodIcon(c.k)}</span>${c.name}${counts?`<span class="n num">${counts[c.k]||0}</span>`:''}</button>`).join('')}${add}</div>`;
 }
 function scopeSeg(current, action){
   return `<div class="seg"><button class="${current==='me'?'on':''}" data-a="${action}" data-v="me">${esc(activeProfile().name)}</button><button class="${current==='all'?'on':''}" data-a="${action}" data-v="all">Everyone</button></div>`;
+}
+function showInstallHint(){
+  if(IN_CLAUDE) return false;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const standalone=navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  let hidden=false; try{ hidden=!!localStorage.getItem('tummi_install_hide'); }catch(_){}
+  return ios && !standalone && !hidden && ui.tab==='lists';
 }
 function header(){
   const p=activeProfile();
   return `<header class="top"><h1 class="wordmark" aria-label="tummi">tummi<i>.</i></h1>
     <button class="me" data-a="switcher" aria-label="Switch profile">${avatar(p,30)}<span>${esc(p.name)}</span>${ic.chev}</button></header>
+    ${showInstallHint()?`<div class="install"><span style="font-size:22px">📲</span><p><b>Install Tummi:</b> tap the Share button, then <b>Add to Home Screen</b>. It opens full screen and works offline.</p><button class="small-btn" data-a="install-hide">Hide</button></div>`:''}
     ${hasDemo()&&!crew?`<div class="banner"><p>These are sample rankings so you can try things out. Your own rankings stay when you clear them.</p><button data-a="clear-demo">Clear samples</button></div>`:''}`;
 }
 function tabbar(){
-  const t=(k,label,icon)=>`<button class="tab ${ui.tab===k?'on':''}" data-a="tab" data-tab="${k}" aria-current="${ui.tab===k}">${icon}<span>${label}</span></button>`;
+  const n=unseenCount();
+  try{ if(navigator.setAppBadge){ n? navigator.setAppBadge(n) : navigator.clearAppBadge(); } }catch(_){}
+  const t=(k,label,icon)=>`<button class="tab ${ui.tab===k?'on':''}" data-a="tab" data-tab="${k}" aria-current="${ui.tab===k}">${icon}<span>${label}</span>${k==='crew'&&n?`<b class="badge num" aria-label="${n} new">${n>9?'9+':n}</b>`:''}</button>`;
   return `<nav class="tabbar" aria-label="Main">${t('lists','Lists',ic.list)}${t('map','Map',ic.map)}<button class="fab" data-a="add" aria-label="Rank something">${ic.plus}</button>${t('areas','Areas',ic.area)}${t('crew','Crew',ic.user)}</nav>`;
 }
 function row(r){
@@ -833,7 +942,7 @@ function viewLists(){
   const anyData=Object.keys(S.items).length>0;
   const areaSel = areas.size ? `<label class="select ${ui.area?'on':''}" for="area-filter"><span aria-hidden="true" style="width:16px;height:16px;display:grid;color:var(--burger)">${ic.map}</span><select id="area-filter" data-change="area" aria-label="Filter by area"><option value="">All areas</option>${[...areas].sort((a,b)=>a[1].localeCompare(b[1])).map(([k,v])=>`<option value="${esc(k)}" ${k===ui.area?'selected':''}>${esc(v)}</option>`).join('')}</select>${ic.chev}</label>` : '';
   return `${catTabs(ui.cat,'set-cat',counts)}
-    <div class="list-head"><h2>${esc(p.name)}'s ${c.name.toLowerCase()}</h2><span class="sub num">${rows.length} ranked</span></div>
+    <div class="list-head"><h2>${esc(p.name)}'s ${c.name.toLowerCase()}</h2><div class="list-tools"><span class="sub num">${rows.length} ranked</span>${c.custom?`<button class="icon-btn" data-a="cat-edit" data-k="${c.k}" aria-label="Edit ${esc(c.name)} category">${ic.pen}</button>`:''}${rows.length&&!IN_CLAUDE?`<button class="small-btn" data-a="share-top">Share</button>`:''}</div></div>
     ${areaSel||styles.length>1?`<div class="filters">${areaSel}${ui.area?'<button class="small-btn" data-a="clear-area">Clear</button>':''}</div>`:''}
     ${styles.length>1?`<div class="chips" aria-label="Filter by style"><button class="chip ${ui.style==='all'?'on':''}" data-a="style" data-v="all">All styles</button>${styles.map(s=>`<button class="chip ${ui.style===s?'on':''}" data-a="style" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>`:''}
     ${rows.length && rows.length<MIN_FOR_STABLE?`<div class="note"><span class="dot"></span><span><b>Still calibrating.</b> Scores settle once you've ranked ${MIN_FOR_STABLE} ${c.name.toLowerCase()}. With only a few, everything sits near the middle of its range.</span></div>`:''}
@@ -842,7 +951,69 @@ function viewLists(){
       rows.length?`<div class="empty" style="--cc:${c.color}"><div class="big">${foodIcon(c.k)}</div><h3>None in ${esc(areas.get(ui.area)||'this area')}</h3><p>${esc(p.name)} hasn't ranked ${c.name.toLowerCase()} here yet.</p><button class="btn" data-a="clear-area">Show all areas</button></div>`:
       `<div class="empty" style="--cc:${c.color}"><div class="big">${foodIcon(c.k)}</div><h3>No ${c.name.toLowerCase()} yet</h3><p>Log one and Tummi will slot it in with a few quick head-to-heads.</p>
        <button class="btn accent" style="--cc:${c.color};--ct:${c.text}" data-a="add" data-cat="${c.k}">Rank a ${c.one}</button>
-       ${!anyData?'<button class="btn" data-a="demo">Load sample data</button>':''}</div>`}`;
+       ${!anyData?'<button class="btn" data-a="demo">Load sample data</button>':''}</div>`}
+    ${wantSection(c)}`;
+}
+
+/* ---- want-to-try ---- */
+function wantsFor(cat, pids){ return Object.values(S.wants).filter(w=>(!cat||cat==='all'||w.cat===cat) && CAT[w.cat] && (!pids || (w.wantIds||[]).some(id=>pids.includes(id)))); }
+function wantRow(w){
+  const c=CAT[w.cat]; const who=(w.wantIds||[]).map(profile).filter(Boolean);
+  return `<button class="want-row" style="--cc:${c.color}" data-a="open-want" data-id="${w.id}"><div class="star">☆</div>
+    <div style="min-width:0"><div class="name">${esc(w.place)}</div><div class="sub"><span class="avs">${who.map(p=>avatar(p,18)).join('')}</span><span>${esc(w.location||w.address||c.name)}</span></div></div>
+    <span class="want-n">${who.length} ${who.length===1?'wants':'want'} it</span></button>`;
+}
+function wantSection(c){
+  const list=wantsFor(c.k).sort((a,b)=>(b.wantIds||[]).length-(a.wantIds||[]).length || (b.createdAt||0)-(a.createdAt||0));
+  return `<h3 class="section-title">Want to try</h3>
+    ${list.length?`<div class="stack" style="gap:8px">${list.map(wantRow).join('')}</div>`:`<p class="muted" style="font-size:13.5px;margin:0 4px 10px">Heard about a ${esc(c.one)} spot? Save it here so the crew sees it too.</p>`}
+    <button class="btn block" style="margin-top:10px" data-a="want-new" data-cat="${c.k}">☆ Add a place to try</button>`;
+}
+function sheetWant(){
+  const w=S.wants[ui.sheet.id]; if(!w){ ui.sheet=null; return ''; }
+  const c=CAT[w.cat]||CATS[0]; const me=S.activeId; const mine=(w.wantIds||[]).includes(me);
+  const who=(w.wantIds||[]).map(profile).filter(Boolean); const by=profile(w.addedBy);
+  return `<div class="panel" role="dialog" aria-label="${esc(w.place)}" style="--cc:${c.color}"><div class="grab"></div>
+    <div class="item-head"><div><h2>${esc(w.place)}</h2><div class="tags">${catTag(c)}<span class="tag">Want to try</span></div></div></div>
+    <dl class="facts">${w.location?`<div><dt>Area</dt><dd>${esc(w.location)}</dd></div>`:''}${by?`<div><dt>Added by</dt><dd>${esc(by.name)}</dd></div>`:''}${w.address?`<div class="w"><dt>Address</dt><dd>${esc(w.address)}</dd></div>`:''}
+      <div class="w"><dt>Wants to go</dt><dd>${who.length?who.map(p=>esc(p.name)).join(', '):'Nobody yet'}</dd></div></dl>
+    ${w.notes?`<div class="notes">${esc(w.notes)}</div>`:''}
+    <div class="actions" style="margin-top:14px"><button class="btn primary" data-a="want-rank" data-id="${w.id}">I went! Rank it</button>
+      <button class="btn" data-a="want-me" data-id="${w.id}">${mine?'Not for me':'Me too'}</button>
+      ${hasPin(w)&&!IN_CLAUDE?`<button class="btn wide" data-a="want-map" data-id="${w.id}">Show on map</button>`:''}
+      <button class="btn danger wide ${ui.sheet.armDel?'armed':''}" data-a="want-del" data-id="${w.id}">${ui.sheet.armDel?'Tap again to remove':'Remove from list'}</button></div></div>`;
+}
+
+/* ---- custom categories ---- */
+const CAT_EMOJI=['🍣','🍜','🍝','🌯','🥪','🌭','🍖','🍤','🥟','🍱','🍛','🥗','🍳','🥞','🧇','🥐','🍩','🍦','🍰','🧁','🍪','🍫','☕','🍺','🍷','🍹','🥙','🥯','🦞','🦪','🍲','🌶️'];
+function sheetCat(){
+  const sh=ui.sheet; const d=sh.draft; const used=sh.k? Object.values(S.items).filter(i=>i.cat===sh.k).length : 0;
+  return `<div class="panel" role="dialog" aria-label="Food category"><div class="grab"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin:0 4px 16px"><div class="thumb" style="--cc:${d.color}">${emojiIcon(d.emoji)}</div><h2>${sh.k?'Edit category':'New food category'}</h2></div>
+    ${sh.error?`<div class="err">${esc(sh.error)}</div>`:''}
+    <div class="field"><label for="cat-name">Name <span class="opt">what you'll see on the tab</span></label><input id="cat-name" class="input" value="${esc(d.name)}" placeholder="e.g. Sushi" maxlength="18" autocomplete="off"></div>
+    <div class="field"><label for="cat-one">One of them <span class="opt">used in "Rank a ___"</span></label><input id="cat-one" class="input" value="${esc(d.one)}" placeholder="e.g. sushi spot" maxlength="20" autocomplete="off"></div>
+    <div class="field"><span class="lab">Icon</span><div class="emoji-grid">${CAT_EMOJI.map(e=>`<button class="${d.emoji===e?'on':''}" data-a="cat-emoji" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div></div>
+    <div class="field"><span class="lab">Color</span><div class="swatches">${P_COLORS.map(c=>`<button class="sw ${d.color===c?'on':''}" style="--pc:${c}" data-a="cat-color" data-v="${c}" aria-label="Color ${c}"></button>`).join('')}</div></div>
+    <div class="field"><label for="cat-styles">Styles <span class="opt">optional, comma separated</span></label><input id="cat-styles" class="input" value="${esc(d.styles)}" placeholder="e.g. Nigiri, Rolls, Omakase" maxlength="120" autocomplete="off"></div>
+    <button class="btn block primary" data-a="cat-save">${sh.k?'Save':'Add category'}</button>
+    ${sh.k?`<button class="btn block danger ${sh.armDel?'armed':''}" style="margin-top:10px" data-a="cat-del" ${used?'disabled':''}>${used?`Has ${used} ${used===1?'ranking':'rankings'}, so it can't be deleted`:sh.armDel?'Tap again to delete':'Delete category'}</button>`:''}</div>`;
+}
+function catDraftSync(){ const d=ui.sheet.draft; d.name=$('#cat-name').value; d.one=$('#cat-one').value; d.styles=$('#cat-styles').value; }
+
+/* ---- reactions & comments ---- */
+const REACTS=['🔥','😋','👍','🤔','🤢'];
+function reactsOf(itemId){ return Object.values(S.reacts).filter(r=>r.itemId===itemId && profile(r.pid)); }
+function commentsOf(itemId){ return Object.values(S.comments).filter(c=>c.itemId===itemId && profile(c.pid)).sort((a,b)=>a.at-b.at); }
+function ago(t){ const s=(Date.now()-t)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; if(s<86400*7) return Math.floor(s/86400)+'d ago'; return new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+function socialBlock(it){
+  const rs=reactsOf(it.id); const me=S.activeId; const mineR=rs.find(r=>r.pid===me);
+  const cs=commentsOf(it.id); const p=activeProfile();
+  return `<div class="reacts" aria-label="Reactions">${REACTS.map(e=>{ const n=rs.filter(r=>r.e===e); return `<button class="react ${mineR?.e===e?'on':''}" data-a="react" data-id="${it.id}" data-v="${e}" title="${esc(n.map(r=>profile(r.pid).name).join(', '))}" aria-pressed="${mineR?.e===e}">${e}${n.length?`<b>${n.length}</b>`:''}</button>`; }).join('')}</div>
+    ${rs.length?`<p class="muted" style="font-size:12.5px;margin:0 2px 6px">${rs.map(r=>`${esc(profile(r.pid).name)} ${r.e}`).join(' · ')}</p>`:''}
+    <h3 class="section-title" style="margin-top:10px">Comments${cs.length?` · ${cs.length}`:''}</h3>
+    ${cs.length?`<div class="comments">${cs.map(c=>{ const cp=profile(c.pid); return `<div class="cmt">${avatar(cp,28)}<div><div class="cwho">${esc(cp.name)} · ${ago(c.at)}${c.pid===me?`<button data-a="comment-del" data-id="${c.id}">Delete</button>`:''}</div><div class="bub">${esc(c.text)}</div></div></div>`; }).join('')}</div>`:''}
+    <div class="cbox"><textarea id="c-text" class="input" placeholder="Comment as ${esc(p.name)}…" maxlength="400" rows="1">${esc(ui.sheet.draft||'')}</textarea><button class="btn primary sm" data-a="comment-send" data-id="${it.id}">Send</button></div>`;
 }
 
 /* Areas: average score of everything ranked in each area. */
@@ -908,7 +1079,8 @@ function viewMap(){
     return `${top}<div class="card stack"><h3>The street map runs on your hosted copy</h3><p class="muted" style="margin:0;line-height:1.45">Inside Claude, map tiles, address search and GPS are blocked. Open Tummi from GitHub Pages to see every spot on a zoomable map. Here's what would be pinned:</p></div>
       <div class="list" style="margin-top:12px">${groups.sort((a,b)=>b.score-a.score).map((g,i)=>{ const b=bucketForScore(g.score); return `<div class="row area" style="--bc:${b.color}"><div class="rank num">${i+1}</div><div class="meta"><div class="name">${esc(g.place)}</div><div class="sub">${esc(g.address)}</div></div><div class="right">${scoreBubble(g.score,b,'sm')}</div></div>`; }).join('')}</div>`;
   }
-  return `${top}<div class="map-wrap"><div id="map" role="application" aria-label="Map of ranked spots"></div><button class="map-btn" data-a="locate">${ic.map.replace('<svg','<svg width="16" height="16"')} Near me</button></div>
+  const nWant=wantsFor(ui.mapCat, ui.mapScope==='me'?[S.activeId]:null).filter(hasPin).length;
+  return `${top}${nWant?`<div class="chips"><button class="chip ${ui.mapWants?'on':''}" data-a="map-wants">☆ Want to try (${nWant})</button></div>`:''}<div class="map-wrap"><div id="map" role="application" aria-label="Map of ranked spots"></div><button class="map-btn" data-a="locate">${ic.map.replace('<svg','<svg width="16" height="16"')} Near me</button></div>
     <p class="muted" style="font-size:13px;margin:10px 4px;line-height:1.4">${groups.length} ${groups.length===1?'spot':'spots'} on the map. Pins show ${ui.mapScope==='me'?'your best score at each place':"everyone's average"}.${unpinned?` ${unpinned} ${unpinned===1?'ranking isn\'t':'rankings aren\'t'} pinned yet; open one and tap Edit details to add a pin.`:''}</p>`;
 }
 function popupHTML(g){
@@ -933,6 +1105,14 @@ async function mountMap(){
     const m=L.marker([g.lat,g.lng],{icon, title:g.place, riseOnHover:true}).addTo(lmap).bindPopup(()=>popupHTML(g),{maxWidth:280});
     m._ids=g.rows.map(r=>r.item.id); markers.push(m);
   });
+  if(ui.mapWants){
+    wantsFor(ui.mapCat, ui.mapScope==='me'?[S.activeId]:null).filter(hasPin).forEach(w=>{
+      const icon=L.divIcon({className:'', iconSize:[40,40], iconAnchor:[6,40], popupAnchor:[14,-36], html:`<div class="pin want" style="width:40px;height:40px"><span>☆</span></div>`});
+      const who=(w.wantIds||[]).map(profile).filter(Boolean);
+      const m=L.marker([w.lat,w.lng],{icon, title:w.place}).addTo(lmap).bindPopup(()=>`<div class="pop"><h4>${esc(w.place)}</h4><div class="addr">${esc(w.address||w.location||'')}</div><button class="pop-row" data-a="open-want" data-id="${w.id}" style="--cc:${CAT[w.cat].color}">${foodIcon(w.cat)}<span class="grow">Want to try<br><small class="muted">${who.length?esc(who.map(p=>p.name).join(', ')):'Nobody yet'}</small></span>☆</button></div>`,{maxWidth:280});
+      m._ids=['want:'+w.id]; markers.push(m);
+    });
+  }
   if(ui.mapFocus){
     const m=markers.find(x=>x._ids.includes(ui.mapFocus)); ui.mapFocus=null; ui.mapFit=false;
     if(m){ lmap.setView(m.getLatLng(),15); setTimeout(()=>m.openPopup(),250); return; }
@@ -955,8 +1135,196 @@ function locateMe(){
 }
 
 function viewCrew(){
-  const seg=`<div class="seg">${[['board','Leaderboard'],['compare','Compare'],['profiles','Profiles']].map(([k,l])=>`<button class="${ui.crew===k?'on':''}" data-a="crew" data-v="${k}">${l}</button>`).join('')}</div>`;
-  return seg + ({board:viewGroup, compare:viewCompare, profiles:viewProfiles}[ui.crew])();
+  if(!['feed','pick','board','compare','profiles'].includes(ui.crew)) ui.crew='feed';
+  const seg=`<div class="seg five">${[['feed','Feed'],['pick','Where to?'],['board','Board'],['compare','Compare'],['profiles','People']].map(([k,l])=>`<button class="${ui.crew===k?'on':''}" data-a="crew" data-v="${k}">${l}</button>`).join('')}</div>`;
+  return seg + ({feed:viewFeed, pick:viewPick, board:viewGroup, compare:viewCompare, profiles:viewProfiles}[ui.crew])();
+}
+
+/* ---- activity feed ---- */
+function feedEvents(){
+  const ev=[];
+  for(const it of Object.values(S.items)) if(profile(it.profileId) && CAT[it.cat]) ev.push({t:it.createdAt||0, pid:it.profileId, type:'rank', it});
+  for(const w of Object.values(S.wants)) if(profile(w.addedBy) && CAT[w.cat]) ev.push({t:w.createdAt||0, pid:w.addedBy, type:'want', w});
+  for(const c of Object.values(S.comments)){ const it=S.items[c.itemId]; if(it && profile(c.pid)) ev.push({t:c.at||0, pid:c.pid, type:'comment', it, c}); }
+  for(const r of Object.values(S.reacts)){ const it=S.items[r.itemId]; if(it && profile(r.pid) && r.pid!==it.profileId) ev.push({t:r.at||0, pid:r.pid, type:'react', it, r}); }
+  return ev.filter(e=>e.t).sort((a,b)=>b.t-a.t);
+}
+function seenAt(){ try{ return +localStorage.getItem('tummi_seen')||0; }catch(_){ return 0; } }
+function setSeen(t){ try{ localStorage.setItem('tummi_seen', String(t)); }catch(_){} }
+function unseenCount(){ const since=seenAt(), me=S.activeId; return feedEvents().filter(e=>e.t>since && e.pid!==me && !e.it?.demo && !e.w?.demo && !profile(e.pid)?.demo).length; }
+function dayLabel(t){ const d=new Date(t), n=new Date(); const k=x=>x.toDateString(); if(k(d)===k(n)) return 'Today'; const y=new Date(n); y.setDate(n.getDate()-1); if(k(d)===k(y)) return 'Yesterday'; return d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'}); }
+function viewFeed(){
+  if(ui.feedSeen==null){ ui.feedSeen=seenAt(); setSeen(Date.now()); }
+  const before=ui.feedSeen; const me=S.activeId;
+  const cache={}; const rk=(pid,cat)=>(cache[pid+'|'+cat] ??= ranked(pid,cat));
+  const ev=feedEvents().slice(0,80);
+  const yr=new Date().getFullYear(); const hasYear=Object.values(S.items).some(i=>i.profileId===me && (i.date||'').startsWith(String(yr)));
+  let last=''; const out=[];
+  for(const e of ev){
+    const lab=dayLabel(e.t); if(lab!==last){ out.push(`<div class="day">${lab}</div>`); last=lab; }
+    const p=profile(e.pid); const isNew=e.t>before && e.pid!==me; const name=e.pid===me?'You':esc(p.name);
+    if(e.type==='rank'){ const it=e.it, c=CAT[it.cat]; const rows=rk(it.profileId,it.cat); const r=rows.find(x=>x.item.id===it.id); if(!r) continue;
+      const rc=reactsOf(it.id), cc=commentsOf(it.id).length;
+      out.push(`<button class="ev ${isNew?'new':''}" data-a="open-item" data-id="${it.id}">${avatar(p,36)}<div><div class="txt"><b>${name}</b> ranked <b>${esc(it.place)}</b>${it.dish?` (${esc(it.dish)})`:''} #${r.rank} of ${rows.length} ${esc(c.name.toLowerCase())}</div>
+        <div class="meta2"><span>${ago(e.t)}</span>${it.location?`<span>${esc(it.location)}</span>`:''}${rc.length?`<span>${[...new Set(rc.map(x=>x.e))].join('')} ${rc.length}</span>`:''}${cc?`<span>💬 ${cc}</span>`:''}</div></div>${scoreBubble(r.score,r.bucket,'sm')}</button>`); }
+    else if(e.type==='want'){ const w=e.w, c=CAT[w.cat];
+      out.push(`<button class="ev ${isNew?'new':''}" data-a="open-want" data-id="${w.id}">${avatar(p,36)}<div><div class="txt"><b>${name}</b> wants to try <b>${esc(w.place)}</b> for ${esc(c.name.toLowerCase())}</div><div class="meta2"><span>${ago(e.t)}</span>${w.location?`<span>${esc(w.location)}</span>`:''}<span>${(w.wantIds||[]).length} ${(w.wantIds||[]).length===1?'wants':'want'} it</span></div></div><span class="want-n">☆</span></button>`); }
+    else if(e.type==='comment'){ const it=e.it; const owner=profile(it.profileId);
+      out.push(`<button class="ev ${isNew?'new':''}" data-a="open-item" data-id="${it.id}">${avatar(p,36)}<div><div class="txt"><b>${name}</b> commented on ${it.profileId===me?'your':esc(owner?.name||'')+"'s"} <b>${esc(it.place)}</b></div><div class="quote">"${esc(e.c.text.length>120?e.c.text.slice(0,118)+'…':e.c.text)}"</div><div class="meta2"><span>${ago(e.t)}</span></div></div><span></span></button>`); }
+    else if(e.type==='react'){ const it=e.it; const owner=profile(it.profileId);
+      out.push(`<button class="ev ${isNew?'new':''}" data-a="open-item" data-id="${it.id}">${avatar(p,36)}<div><div class="txt"><b>${name}</b> reacted ${e.r.e} to ${it.profileId===me?'your':esc(owner?.name||'')+"'s"} <b>${esc(it.place)}</b></div><div class="meta2"><span>${ago(e.t)}</span></div></div><span></span></button>`); }
+  }
+  return `${hasYear?`<button class="hero-card" data-a="recap-open"><span class="big">🏆</span><div><h3>Your ${yr} in Tummi</h3><p>Best finds, your taste twin and your hottest take.</p></div></button>`:''}
+    <button class="hero-card" style="background:var(--burger)" data-a="crew" data-v="pick"><span class="big">🍽️</span><div><h3>Where should we eat?</h3><p>Pick who's coming and Tummi suggests a spot.</p></div></button>
+    ${out.length?`<div class="feed">${out.join('')}</div>`:`<div class="empty"><div class="big">${ic.user}</div><h3>Nothing yet</h3><p>Rankings, want-to-try spots, reactions and comments from your crew show up here.</p></div>`}`;
+}
+
+/* ---- where should we eat? ---- */
+function pickModel(){
+  const who=ui.pickWho; const cats= ui.pickCat==='all'? CATS.map(c=>c.k) : [ui.pickCat];
+  const cand=new Map();
+  for(const pid of who) for(const cat of cats) for(const r of ranked(pid,cat)){
+    const it=r.item; if(ui.pickArea && norm(it.location)!==ui.pickArea) continue;
+    const key=norm(it.place)+'|'+norm(it.location);
+    if(!cand.has(key)) cand.set(key,{key, place:it.place, location:it.location, cats:new Set(), per:new Map(), best:null});
+    const c=cand.get(key); c.cats.add(cat);
+    const prev=c.per.get(pid); if(prev==null || r.score>prev) c.per.set(pid, r.score);
+    if(!c.best || pid===S.activeId || r.score>c.best.score) c.best={id:it.id, score:r.score, pid};
+  }
+  const rows=[...cand.values()].map(c=>{ const sc=[...c.per.values()]; const avg=sc.reduce((a,b)=>a+b,0)/sc.length; const min=Math.min(...sc); const tried=c.per.size; const all=tried===who.length;
+    return {...c, avg, min, tried, all, value: avg + 0.8*(tried/who.length) + (all&&min>=6.7?0.6:0)}; });
+  const hated=rows.filter(r=>r.min<3.4);
+  const ok=rows.filter(r=>r.min>=3.4).sort((a,b)=>b.value-a.value);
+  const loved=ok.filter(r=>r.all && r.min>=6.7 && who.length>1);
+  const rest=ok.filter(r=>!loved.includes(r));
+  const wants=wantsFor(ui.pickCat, who).filter(w=>!ui.pickArea || norm(w.location)===ui.pickArea).filter(w=>!cand.has(norm(w.place)+'|'+norm(w.location)))
+    .map(w=>({w, n:(w.wantIds||[]).filter(x=>who.includes(x)).length})).sort((a,b)=>b.n-a.n || (b.w.wantIds||[]).length-(a.w.wantIds||[]).length);
+  return {who, loved, rest, hated, wants};
+}
+function pickWhy(r, who){
+  if(who.length===1) return `You gave it ${r.avg.toFixed(1)}${r.location?` · ${esc(r.location)}`:''}`;
+  const parts=who.map(pid=>{ const p=profile(pid); const v=r.per.get(pid); return v==null? `${esc(p.name)} hasn't been` : `${esc(p.name)} ${v.toFixed(1)}`; });
+  return parts.join(' · ')+(r.location?` · ${esc(r.location)}`:'');
+}
+function pickRow(r, who){ const b=bucketForScore(r.avg);
+  return `<button class="pick-row" style="--bc:${b.color}" data-a="open-item" data-id="${r.best.id}"><div><div class="name">${esc(r.place)} <span class="muted" style="font-weight:600;font-size:12.5px">${[...r.cats].map(k=>CAT[k]?.emoji||'').join('')}</span></div><div class="why">${pickWhy(r,who)}</div></div>${scoreBubble(r.avg,b,'sm')}</button>`; }
+function viewPick(){
+  if(!ui.pickWho) ui.pickWho=[S.activeId];
+  ui.pickWho=ui.pickWho.filter(id=>profile(id)); if(!ui.pickWho.length) ui.pickWho=[S.activeId];
+  const m=pickModel(); const who=m.who;
+  const areas=areaNames([...Object.values(S.items), ...Object.values(S.wants)]);
+  if(ui.pickArea && !areas.has(ui.pickArea)) ui.pickArea='';
+  let surprise='';
+  if(ui.pickSurprise){
+    const sp=ui.pickSurprise;
+    if(sp.kind==='place'){ const r=[...m.loved,...m.rest].find(x=>x.key===sp.key); if(r){ const b=bucketForScore(r.avg); surprise=`<div class="pick-card" style="--bc:${b.color}"><div class="muted" style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Tonight's pick</div><div class="name">${esc(r.place)}</div><div class="why">${pickWhy(r,who)}</div><div class="two" style="margin-top:12px"><button class="btn sm" data-a="open-item" data-id="${r.best.id}">Details</button><button class="btn sm primary" data-a="pick-surprise">Pick again</button></div></div>`; } }
+    else { const x=m.wants.find(y=>y.w.id===sp.id); if(x){ surprise=`<div class="pick-card" style="--bc:var(--grape)"><div class="muted" style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Tonight's pick · something new</div><div class="name">${esc(x.w.place)}</div><div class="why">${x.n} of you ${x.n===1?'wants':'want'} to try it${x.w.location?` · ${esc(x.w.location)}`:''}</div><div class="two" style="margin-top:12px"><button class="btn sm" data-a="open-want" data-id="${x.w.id}">Details</button><button class="btn sm primary" data-a="pick-surprise">Pick again</button></div></div>`; } }
+  }
+  const any=m.loved.length||m.rest.length||m.wants.length;
+  return `<h3 class="section-title" style="margin-top:4px">Who's eating?</h3>
+    <div class="who-row">${S.profiles.map(p=>`<button class="who ${who.includes(p.id)?'on':''}" data-a="pick-who" data-id="${p.id}" aria-pressed="${who.includes(p.id)}">${avatar(p,26)}${esc(p.name)}</button>`).join('')}${S.profiles.length>2?`<button class="small-btn" data-a="pick-all">Everyone</button>`:''}</div>
+    <h3 class="section-title">Craving</h3>
+    ${catTabs(ui.pickCat,'pick-cat',null,true)}
+    ${areas.size?`<div class="filters"><label class="select ${ui.pickArea?'on':''}" for="pick-area"><span aria-hidden="true" style="width:16px;height:16px;display:grid;color:var(--burger)">${ic.map}</span><select id="pick-area" data-change="pick-area" aria-label="Area"><option value="">Anywhere</option>${[...areas].sort((a,b)=>a[1].localeCompare(b[1])).map(([k,v])=>`<option value="${esc(k)}" ${k===ui.pickArea?'selected':''}>${esc(v)}</option>`).join('')}</select>${ic.chev}</label></div>`:''}
+    ${any?`<button class="btn block primary" style="margin:4px 0 12px" data-a="pick-surprise">🎲 Pick for us</button>`:''}
+    ${surprise}
+    ${m.loved.length?`<h3 class="section-title">Everyone's happy</h3><div class="stack" style="gap:8px">${m.loved.slice(0,8).map(r=>pickRow(r,who)).join('')}</div>`:''}
+    ${m.rest.length?`<h3 class="section-title">${who.length===1?'Your favorites':'Good bets'}</h3><div class="stack" style="gap:8px">${m.rest.slice(0,10).map(r=>pickRow(r,who)).join('')}</div>`:''}
+    ${m.wants.length?`<h3 class="section-title">Try something new</h3><div class="stack" style="gap:8px">${m.wants.slice(0,8).map(x=>wantRow(x.w)).join('')}</div>`:''}
+    ${m.hated.length?`<h3 class="section-title">Skipping</h3><p class="skip">${m.hated.slice(0,12).map(r=>{ const pid=[...r.per].find(([,v])=>v<3.4)[0]; return `<b>${esc(r.place)}</b> (${esc(profile(pid).name)} didn't like it)`; }).join(' · ')}</p>`:''}
+    ${!any&&!m.hated.length?`<div class="empty"><div class="big">🍽️</div><h3>No ideas yet</h3><p>Rank a few spots or add some to want-to-try, and suggestions show up here.</p></div>`:''}`;
+}
+
+/* ---- year in review ---- */
+function recapYears(pid){ return [...new Set(Object.values(S.items).filter(i=>i.profileId===pid && i.date).map(i=>+i.date.slice(0,4)))].sort((a,b)=>b-a); }
+function recapData(pid, year){
+  const mine=Object.values(S.items).filter(i=>i.profileId===pid && (i.date||'').startsWith(String(year)) && CAT[i.cat]);
+  const cache={}; const rk=cat=>(cache[cat] ??= ranked(pid,cat));
+  const scored=mine.map(it=>({it, r:rk(it.cat).find(x=>x.item.id===it.id)})).filter(x=>x.r);
+  const byCat=CATS.map(c=>({c, n:scored.filter(x=>x.it.cat===c.k).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  const best=[...scored].sort((a,b)=>b.r.score-a.r.score)[0];
+  const tops=byCat.map(({c})=>({c, x:scored.filter(s=>s.it.cat===c.k).sort((a,b)=>a.r.rank-b.r.rank)[0]}));
+  const areaCount=new Map(); scored.forEach(x=>{ const k=norm(x.it.location); if(k) areaCount.set(k,{name:x.it.location.trim(), n:(areaCount.get(k)?.n||0)+1}); });
+  const topArea=[...areaCount.values()].sort((a,b)=>b.n-a.n)[0];
+  const months=new Array(12).fill(0); scored.forEach(x=>{ const m=+x.it.date.slice(5,7)-1; if(m>=0) months[m]++; });
+  const busy=months.indexOf(Math.max(...months));
+  let twin=null;
+  for(const q of S.profiles){ if(q.id===pid) continue; const diffs=[];
+    for(const c of CATS){ const a=keyedRanks(pid,c.k), b=keyedRanks(q.id,c.k); for(const [k,r] of a) if(b.has(k)) diffs.push(Math.abs(r.score-b.get(k).score)); }
+    if(diffs.length>=2){ const pct=Math.max(0,Math.min(100,Math.round(100-diffs.reduce((s,v)=>s+v,0)/diffs.length*10))); if(!twin || pct>twin.pct) twin={p:q, pct, n:diffs.length}; } }
+  let hot=null;
+  for(const x of scored){ const others=[]; for(const q of S.profiles){ if(q.id===pid) continue; const k=keyedRanks(q.id,x.it.cat).get(norm(x.it.place)); if(k) others.push(k.score); }
+    if(!others.length) continue; const avg=others.reduce((a,b)=>a+b,0)/others.length; const gap=x.r.score-avg;
+    if(Math.abs(gap)>=1.5 && (!hot || Math.abs(gap)>Math.abs(hot.gap))) hot={...x, avg, gap}; }
+  return {n:scored.length, places:new Set(scored.map(x=>norm(x.it.place))).size, areas:areaCount.size, byCat, best, tops, topArea, busy: scored.length? busy : -1, twin, hot};
+}
+function sheetRecap(){
+  const p=activeProfile(); const years=recapYears(p.id);
+  if(!ui.recapYear || !years.includes(ui.recapYear)) ui.recapYear=years[0]||new Date().getFullYear();
+  const y=ui.recapYear; const d=recapData(p.id,y);
+  const M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const max=Math.max(1,...d.byCat.map(x=>x.n));
+  return `<div class="panel full" role="dialog" aria-label="Year in review"><div class="sheet-head"><button data-a="close" aria-label="Close">${ic.x}</button><div class="t">${esc(p.name)}'s ${y}</div><span></span></div>
+  <div class="sheet-body"><div class="stack">
+    ${years.length>1?`<div class="chips">${years.map(v=>`<button class="chip ${v===y?'on':''}" data-a="recap-year" data-v="${v}">${v}</button>`).join('')}</div>`:''}
+    ${!d.n?`<div class="empty"><div class="big">🗓️</div><h3>Nothing ranked in ${y}</h3><p>Rankings use the date you ate there.</p></div>`:`
+    <div class="stat-grid"><div class="stat"><div class="v num">${d.n}</div><div class="l">things ranked</div></div><div class="stat"><div class="v num">${d.places}</div><div class="l">places tried</div></div>
+      <div class="stat"><div class="v num">${d.areas}</div><div class="l">areas explored</div></div><div class="stat"><div class="v" style="font-size:22px;padding-top:6px">${d.busy>=0?M[d.busy]:'–'}</div><div class="l">busiest month</div></div></div>
+    <h3 class="section-title">What you ate</h3>
+    <div class="card bars">${d.byCat.map(({c,n})=>`<div class="bar" style="--cc:${c.color}"><span>${esc(c.name)}</span><i style="width:${Math.max(6,Math.round(n/max*100))}%"></i><span class="num">${n}</span></div>`).join('')}</div>
+    <h3 class="section-title">Highlights</h3>
+    ${d.best?`<button class="hl" data-a="open-item" data-id="${d.best.it.id}" style="text-align:left;width:100%"><div class="e">🏆</div><div><div class="k">Best find</div><div class="t">${esc(d.best.it.place)}</div><div class="s">${esc(CAT[d.best.it.cat].name)} · ${d.best.r.score.toFixed(1)}</div></div>${scoreBubble(d.best.r.score,d.best.r.bucket,'sm')}</button>`:''}
+    ${d.tops.filter(t=>t.x && t.x.it.id!==d.best?.it.id).map(t=>`<button class="hl" data-a="open-item" data-id="${t.x.it.id}" style="text-align:left;width:100%"><div class="e">${esc(t.c.emoji||'⭐')}</div><div><div class="k">Top ${esc(t.c.one)}</div><div class="t">${esc(t.x.it.place)}</div><div class="s">#${t.x.r.rank} all time</div></div>${scoreBubble(t.x.r.score,t.x.r.bucket,'sm')}</button>`).join('')}
+    ${d.topArea?`<div class="hl"><div class="e">📍</div><div><div class="k">Home turf</div><div class="t">${esc(d.topArea.name)}</div><div class="s">${d.topArea.n} ${d.topArea.n===1?'ranking':'rankings'}</div></div><span></span></div>`:''}
+    ${d.twin?`<div class="hl"><div class="e">👯</div><div><div class="k">Taste twin</div><div class="t">${esc(d.twin.p.name)} · ${d.twin.pct}% match</div><div class="s">on ${d.twin.n} shared spots</div></div>${avatar(d.twin.p,32)}</div>`:''}
+    ${d.hot?`<button class="hl" data-a="open-item" data-id="${d.hot.it.id}" style="text-align:left;width:100%"><div class="e">🌶️</div><div><div class="k">Hottest take</div><div class="t">${esc(d.hot.it.place)}</div><div class="s">You gave it ${d.hot.r.score.toFixed(1)}, the crew ${d.hot.avg.toFixed(1)}</div></div><span></span></button>`:''}
+    ${!IN_CLAUDE?`<button class="btn block primary" style="margin-top:6px" data-a="recap-share">Share my year</button>`:''}`}
+  </div></div></div>`;
+}
+
+/* ---- shareable image cards ---- */
+const BUCKET_HEX={liked:['#2F9A6C','#fff'], fine:['#E6A23C','#2A1C12'], disliked:['#D9573D','#fff']};
+async function shareCard({title, subtitle, rows, filename}){
+  const W=1080, H=1350, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d');
+  try{ await Promise.all(['600 80px Outfit','500 40px Outfit','700 40px Figtree','500 30px Figtree'].map(f=>document.fonts.load(f))); }catch(_){}
+  const ink='#231811', ink2='#76675A';
+  g.fillStyle='#FBF5EA'; g.fillRect(0,0,W,H);
+  g.textBaseline='alphabetic';
+  g.font='600 60px Outfit, sans-serif'; g.fillStyle=ink; g.fillText('tummi',80,130); const wm=g.measureText('tummi').width; g.fillStyle='#DD5A3E'; g.fillText('.',80+wm,130);
+  let fs=78; g.font=`600 ${fs}px Outfit, sans-serif`; while(g.measureText(title).width>920 && fs>44){ fs-=2; g.font=`600 ${fs}px Outfit, sans-serif`; }
+  g.fillStyle=ink; g.fillText(title,80,265);
+  g.font='500 32px Figtree, sans-serif'; g.fillStyle=ink2; g.fillText(subtitle,80,322);
+  const fit=(t,w)=>{ if(g.measureText(t).width<=w) return t; while(t.length>1 && g.measureText(t+'…').width>w) t=t.slice(0,-1); return t+'…'; };
+  const rr=(x,y,w,h,r)=>{ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
+  rows.slice(0,6).forEach((r,i)=>{
+    const y=380+i*150;
+    g.save(); g.shadowColor='rgba(35,24,17,.12)'; g.shadowBlur=24; g.shadowOffsetY=8; g.fillStyle='#FFFDF9'; rr(60,y,960,128,28); g.fill(); g.restore();
+    g.fillStyle=r.accent||'#E9DDCB'; rr(60,y,10,128,5); g.fill();
+    g.fillStyle=ink; g.font='600 52px Outfit, sans-serif'; g.textAlign='center'; g.fillText(r.lead,135,y+82); g.textAlign='left';
+    g.font='700 40px Figtree, sans-serif'; g.fillStyle=ink; g.fillText(fit(r.name,640),195,y+60);
+    g.font='500 28px Figtree, sans-serif'; g.fillStyle=ink2; g.fillText(fit(r.sub||'',640),195,y+100);
+    if(r.score!=null){ const [bg,fg]=BUCKET_HEX[r.bucket||'liked']; g.fillStyle=bg; g.beginPath(); g.arc(940,y+64,46,0,Math.PI*2); g.fill(); g.fillStyle=fg; g.font='600 38px Outfit, sans-serif'; g.textAlign='center'; g.fillText(r.score.toFixed(1),940,y+78); g.textAlign='left'; }
+  });
+  g.font='500 28px Figtree, sans-serif'; g.fillStyle=ink2; g.fillText('Ranked on Tummi · '+location.host+location.pathname.replace(/index\.html$/,'').replace(/\/$/,''),80,H-60);
+  const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
+  const file=new File([blob], filename, {type:'image/png'});
+  try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title}); return; } }catch(e){ if(e && e.name==='AbortError') return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },800);
+  toast('Image saved');
+}
+function shareTop(){
+  const p=activeProfile(), c=CAT[ui.cat]; const rows=ranked(p.id,c.k).slice(0,6);
+  const when=new Date().toLocaleDateString(undefined,{month:'long', year:'numeric'});
+  return shareCard({title:`${p.name}'s top ${c.name.toLowerCase()}`, subtitle:`${ranked(p.id,c.k).length} ranked · ${when}`, filename:`tummi-top-${c.k}.png`,
+    rows:rows.map(r=>({lead:'#'+r.rank, name:r.item.place+(r.item.dish?` · ${r.item.dish}`:''), sub:[r.item.location, r.item.style].filter(Boolean).join(' · '), score:r.score, bucket:r.bucket.k, accent:BUCKET_HEX[r.bucket.k][0]}))});
+}
+function shareRecap(){
+  const p=activeProfile(), y=ui.recapYear; const d=recapData(p.id,y); const rows=[];
+  if(d.best) rows.push({lead:'🏆', name:d.best.it.place, sub:'Best find · '+CAT[d.best.it.cat].name, score:d.best.r.score, bucket:d.best.r.bucket.k, accent:'#E6A23C'});
+  d.tops.filter(t=>t.x && t.x.it.id!==d.best?.it.id).slice(0,3).forEach(t=>rows.push({lead:t.c.emoji||'⭐', name:t.x.it.place, sub:'Top '+t.c.one, score:t.x.r.score, bucket:t.x.r.bucket.k, accent:'#2F9A78'}));
+  if(d.twin) rows.push({lead:'👯', name:`${d.twin.p.name} · ${d.twin.pct}% match`, sub:'Taste twin', accent:'#6656D8'});
+  if(d.hot) rows.push({lead:'🌶️', name:d.hot.it.place, sub:`Hottest take: ${d.hot.r.score.toFixed(1)} vs crew ${d.hot.avg.toFixed(1)}`, accent:'#DD5A3E'});
+  return shareCard({title:`${p.name}'s ${y} in Tummi`, subtitle:`${d.n} ranked · ${d.places} places · ${d.areas} areas`, rows, filename:`tummi-${y}.png`});
 }
 function viewCompare(){
   if(S.profiles.length<2) return `<div class="empty"><div class="big">${ic.user}</div><h3>Add a friend to compare</h3><p>Make a profile for a friend, rank a few spots for them, then see where your tastes line up.</p><button class="btn primary" data-a="new-profile">Add a friend</button></div>`;
@@ -1081,6 +1449,7 @@ function sheetItem(){
     ${r?`<div class="rankline"><b class="num">#${r.rank} of ${rows.length}</b> ${c.name.toLowerCase()} for ${esc(owner?.name)} · ${r.bucket.label}${r.tied?' · tied':''}</div>`:''}
     ${facts.length||it.address?`<dl class="facts">${facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}${it.address&&it.address!==it.location+', MI'?`<div class="w"><dt>Address</dt><dd>${esc(it.address)}</dd></div>`:''}</dl>`:''}
     ${it.notes?`<div class="notes">${esc(it.notes)}</div>`:''}
+    ${socialBlock(it)}
     <div class="actions"><button class="btn primary" data-a="rerank" data-id="${it.id}">Re-rank</button><button class="btn" data-a="edit-item" data-id="${it.id}">Edit details</button>
       ${hasPin(it)&&!IN_CLAUDE?`<button class="btn wide" data-a="show-on-map" data-id="${it.id}">Show on map</button>`:''}
       <button class="btn danger wide ${ui.sheet.armDel?'armed':''}" data-a="del-item" data-id="${it.id}">${ui.sheet.armDel?'Tap again to delete':'Delete'}</button></div></div>`;
@@ -1089,9 +1458,11 @@ function sheetItem(){
 /* ---- rank flow ---- */
 function startFlow(mode, opts={}){
   const p=activeProfile();
-  if(mode==='new'){
+  if(mode==='new' || mode==='want'){
     const c = opts.cat || ui.cat;
     flow={mode, step:'details', item:{id:uid(), profileId:p.id, cat:c, place:'', dish:'', style:'', photo:null, price:'', date:today(), location:ui.area? (areaNames(Object.values(S.items)).get(ui.area)||'') : '', lat:null, lng:null, address:'', withIds:[], withText:'', notes:'', tie:null, createdAt:Date.now()}};
+    if(opts.prefill) Object.assign(flow.item, opts.prefill);
+    if(opts.fromWant) flow.fromWant=opts.fromWant;
   } else {
     const src=S.items[opts.id]; if(!src) return;
     flow={mode, step: mode==='rerank'?'bucket':'details', item:clone(src)};
@@ -1116,15 +1487,15 @@ function flowDetails(){
   const pastStyles=Object.values(S.items).filter(i=>i.cat===it.cat && i.style).map(i=>i.style);
   const styles=[...new Set([...c.styles, ...pastStyles])];
   const others=S.profiles.filter(x=>x.id!==it.profileId);
-  const edit=flow.mode==='edit';
-  return `<div class="sheet-head"><button data-a="flow-close" aria-label="Close">${ic.x}</button><div class="t">${edit?'Edit details':'Rank a bite'}</div><div class="steps">${edit?'':'1 of 3'}</div></div>
+  const edit=flow.mode==='edit'; const want=flow.mode==='want';
+  return `<div class="sheet-head"><button data-a="flow-close" aria-label="Close">${ic.x}</button><div class="t">${edit?'Edit details':want?'Want to try':'Rank a bite'}</div><div class="steps">${edit||want?'':'1 of 3'}</div></div>
   <div class="sheet-body">
     ${flow.error?`<div class="err"><span>${flow.error}</span>${flow.dupId?`<button class="small-btn" data-a="rerank" data-id="${flow.dupId}">Re-rank that one instead</button>`:''}</div>`:''}
-    <div class="field"><span class="lab">What did ${others.length?esc(p.name):'you'} eat?</span><div class="catgrid">${CATS.map(x=>`<button class="ctile ${x.k===it.cat?'on':''}" style="--cc:${x.color};--ct:${x.text}" data-a="f-cat" data-cat="${x.k}" ${edit?'disabled':''}><span class="e">${foodIcon(x.k)}</span>${x.name}</button>`).join('')}</div>${edit?'<span class="opt">To move it to another food, delete it and rank it again.</span>':''}</div>
+    <div class="field"><span class="lab">${want?'What kind of food?':`What did ${others.length?esc(p.name):'you'} eat?`}</span><div class="catgrid">${CATS.map(x=>`<button class="ctile ${x.k===it.cat?'on':''}" style="--cc:${x.color};--ct:${x.text}" data-a="f-cat" data-cat="${x.k}" ${edit?'disabled':''}><span class="e">${foodIcon(x.k)}</span>${x.name}</button>`).join('')}</div>${edit?'<span class="opt">To move it to another food, delete it and rank it again.</span>':''}</div>
     <div class="field"><label for="f-loc">Location <span class="opt">city or neighborhood, used for Areas</span></label><div class="ac"><input id="f-loc" class="input" data-f="location" data-ac="loc" value="${esc(it.location)}" placeholder="Start typing a city" autocomplete="off" maxlength="40" role="combobox" aria-autocomplete="list" aria-controls="ac-loc"><div class="ac-list" id="ac-loc" role="listbox"></div></div></div>
     <div class="field"><label for="f-place">Place</label><div class="ac"><input id="f-place" class="input" data-f="place" data-ac="place" value="${esc(it.place)}" placeholder="${IN_CLAUDE?'e.g. Smash Shack':'Start typing a restaurant name'}" autocomplete="off" maxlength="60" role="combobox" aria-autocomplete="list" aria-controls="ac-place"><div class="ac-list" id="ac-place" role="listbox"></div></div></div>
     ${pinField(it)}
-    <div class="field"><label for="f-dish">Dish name <span class="opt">optional, for a second item from the same place</span></label><input id="f-dish" class="input" data-f="dish" value="${esc(it.dish)}" placeholder="e.g. Double smash w/ onions" autocomplete="off" maxlength="60"></div>
+    ${want?'':`    <div class="field"><label for="f-dish">Dish name <span class="opt">optional, for a second item from the same place</span></label><input id="f-dish" class="input" data-f="dish" value="${esc(it.dish)}" placeholder="e.g. Double smash w/ onions" autocomplete="off" maxlength="60"></div>
     <div class="field"><label for="f-style">Style <span class="opt">a label for reference, never ranked separately</span></label>
       <div class="chips" style="margin:0">${styles.map(s=>`<button class="chip ${it.style===s?'on':''}" data-a="f-style" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>
       <input id="f-style" class="input" data-f="style" value="${esc(it.style)}" placeholder="Or type your own" autocomplete="off" maxlength="30"></div>
@@ -1133,9 +1504,10 @@ function flowDetails(){
       <div class="field"><label for="f-date">Date</label><input id="f-date" class="input" data-f="date" type="date" value="${esc(it.date)}"></div></div>
     <div class="field"><label for="f-with">Who you were with</label>${others.length?`<div class="chips" style="margin:0">${others.map(o=>`<button class="chip ${it.withIds.includes(o.id)?'on':''}" data-a="f-with" data-id="${o.id}">${esc(o.name)}</button>`).join('')}</div>`:''}
       <input id="f-with" class="input" data-f="withText" value="${esc(it.withText)}" placeholder="${others.length?'Anyone else?':'Names'}" autocomplete="off" maxlength="80"></div>
-    <div class="field"><label for="f-notes">Notes</label><textarea id="f-notes" class="input" data-f="notes" placeholder="What made it good (or not)?" maxlength="600">${esc(it.notes)}</textarea></div>
+`}
+    <div class="field"><label for="f-notes">${want?'Why? <span class="opt">optional</span>':'Notes'}</label><textarea id="f-notes" class="input" data-f="notes" placeholder="${want?'e.g. Jess says the birria is unreal':'What made it good (or not)?'}" maxlength="600">${esc(it.notes)}</textarea></div>
   </div>
-  <div class="sheet-foot"><button class="btn primary block" data-a="${edit?'flow-save':'flow-next'}">${edit?'Save changes':'Next: how was it?'}</button></div>`;
+  <div class="sheet-foot"><button class="btn primary block" data-a="${want?'want-save':edit?'flow-save':'flow-next'}">${want?'Save to want-to-try':edit?'Save changes':'Next: how was it?'}</button></div>`;
 }
 function flowBucket(){
   const it=flow.item; const c=CAT[it.cat];
@@ -1219,6 +1591,7 @@ function finalize(pos, tieWithId){
     while(p>0 && p<arr.length && S.items[arr[p-1]].tie && S.items[arr[p-1]].tie===S.items[arr[p]].tie) p++;
     arr.splice(p,0,it.id);
   }
+  if(flow.fromWant && S.wants[flow.fromWant]){ const w=S.wants[flow.fromWant]; w.wantIds=(w.wantIds||[]).filter(x=>x!==it.profileId); if(!w.wantIds.length) delete S.wants[w.id]; flow.fromWant=null; }
   commit({items:[...new Set(changed)]});
   ui.mapFit=true;
   flow.resultId=it.id; flow.step='result';
@@ -1277,7 +1650,8 @@ function photonPlace(f){
   return {p, lat:+(+lat).toFixed(5), lng:+(+lng).toFixed(5), street, city, state:p.state||'', country:p.countrycode||''};
 }
 function acCenter(){
-  if(flow?.locGeo) return flow.locGeo;
+  if(!flow) return null;
+  if(flow.locGeo) return flow.locGeo;
   if(flow?.here) return flow.here;
   if(hasPin(flow.item)) return {lat:flow.item.lat, lng:flow.item.lng};
   const last=Object.values(S.items).filter(hasPin).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0];
@@ -1307,6 +1681,7 @@ function acInput(kind, typed){
   st.timer=setTimeout(()=>acFetch(kind,q), 280);
 }
 async function acFetch(kind, q){
+  if(!flow) return;
   const st=ac[kind]; const seq=++st.seq;
   const params=new URLSearchParams({q, limit: kind==='loc'?'8':'10', lang:'en'});
   const c=acCenter();
@@ -1358,7 +1733,7 @@ async function nearbyPlaces(lat,lng){
     syncForm(); flow.geoResults=rows; flow.geoMsg='Pinned to where you are. Eating at one of these?'; renderSheet();
   }catch(e){}
 }
-document.addEventListener('input', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k, true); });
+document.addEventListener('input', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k, true); if(e.target.id==='c-text' && ui.sheet) ui.sheet.draft=e.target.value; });
 document.addEventListener('focusin', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k); });
 document.addEventListener('focusout', e=>{ const k=e.target.dataset?.ac; if(k) setTimeout(()=>{ const el=document.getElementById(k==='loc'?'f-loc':'f-place'); if(el && document.activeElement!==el){ ac[k].list=[]; acRender(k); } },250); });
 document.addEventListener('keydown', e=>{ const k=e.target.dataset?.ac; if(k && e.key==='Enter' && ac[k].list.length){ e.preventDefault(); syncForm(); acPick(k,0); } });
@@ -1367,7 +1742,7 @@ document.addEventListener('keydown', e=>{ const k=e.target.dataset?.ac; if(k && 
 function renderSheet(){
   const el=$('#sheet');
   if(!ui.sheet){ el.className=''; el.innerHTML=''; document.body.classList.remove('locked'); return; }
-  const builders={crew:sheetCrew, switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
+  const builders={crew:sheetCrew, want:sheetWant, cat:sheetCat, recap:sheetRecap, switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
   const inner=builders[ui.sheet.type]();
   if(!ui.sheet){ renderSheet(); return; }
   const prevSc = el.querySelector('.sheet-body, .panel:not(.full)');
@@ -1379,7 +1754,10 @@ function renderSheet(){
   const sc=el.querySelector('.sheet-body, .panel:not(.full)'); if(sc && top) sc.scrollTop=top;
 }
 function renderMain(){
+  ensureS(); rebuildCats();
   if(!profile(S.activeId)) S.activeId=S.profiles[0].id;
+  if(!CAT[ui.cat]) ui.cat=CATS[0].k; if(!CAT[ui.cmpCat]) ui.cmpCat=CATS[0].k; if(!CAT[ui.groupCat]) ui.groupCat=CATS[0].k;
+  if(ui.areaCat!=='all' && !CAT[ui.areaCat]) ui.areaCat='all'; if(ui.mapCat!=='all' && !CAT[ui.mapCat]) ui.mapCat='all'; if(ui.pickCat!=='all' && !CAT[ui.pickCat]) ui.pickCat='all';
   if(lmap && ui.tab!=='map'){ lmap.remove(); lmap=null; }
   $('#app').innerHTML = header() + `<main>${VIEWS[ui.tab]()}</main>` + tabbar();
   if(ui.tab==='map' && !IN_CLAUDE) mountMap();
@@ -1412,6 +1790,7 @@ document.addEventListener('change', async e=>{
     renderSheet();
   }
   if(kind==='area'){ ui.area=el.value; ui.style='all'; renderMain(); }
+  if(kind==='pick-area'){ ui.pickArea=el.value; ui.pickSurprise=null; renderMain(); }
   if(kind==='import' && el.files && el.files[0]) importBackup(el.files[0]);
 });
 document.addEventListener('click', e=>{
@@ -1420,7 +1799,7 @@ document.addEventListener('click', e=>{
   syncForm();
   if(a!=='reset') ui.armReset=false;
   switch(a){
-    case 'tab': ui.tab=d.tab; window.scrollTo(0,0); render(); break;
+    case 'tab': if(ui.tab!==d.tab) ui.feedSeen=null; ui.tab=d.tab; window.scrollTo(0,0); render(); break;
     case 'set-cat': ui.cat=d.cat; ui.style='all'; renderMain(); break;
     case 'style': ui.style=d.v; renderMain(); break;
     case 'clear-area': ui.area=''; renderMain(); break;
@@ -1436,7 +1815,61 @@ document.addEventListener('click', e=>{
     case 'map-cat': ui.mapCat=d.cat; ui.mapFit=true; renderMain(); break;
     case 'locate': locateMe(); break;
     case 'show-on-map': ui.mapFocus=d.id; ui.mapScope= S.items[d.id].profileId===S.activeId ? 'me' : 'all'; ui.mapCat='all'; ui.sheet=null; ui.tab='map'; window.scrollTo(0,0); render(); break;
-    case 'crew': ui.crew=d.v; renderMain(); break;
+    case 'crew': if(ui.crew!==d.v || ui.tab!=='crew') ui.feedSeen=null; ui.crew=d.v; ui.tab='crew'; window.scrollTo(0,0); renderMain(); break;
+    // where to eat
+    case 'pick-who': { const w=ui.pickWho||[S.activeId]; const i=w.indexOf(d.id); if(i>=0){ if(w.length>1) w.splice(i,1); } else w.push(d.id); ui.pickWho=w; ui.pickSurprise=null; renderMain(); } break;
+    case 'pick-all': ui.pickWho=S.profiles.map(p=>p.id); ui.pickSurprise=null; renderMain(); break;
+    case 'pick-cat': ui.pickCat=d.cat; ui.pickSurprise=null; renderMain(); break;
+    case 'pick-surprise': { const m=pickModel(); const pool=[...m.loved.slice(0,4), ...m.rest.slice(0,4)].map(r=>({kind:'place', key:r.key})).concat(m.wants.slice(0,3).map(x=>({kind:'want', id:x.w.id})));
+      const prev=ui.pickSurprise; const opts=pool.length>1? pool.filter(x=>!prev || (x.key||x.id)!==(prev.key||prev.id)) : pool;
+      ui.pickSurprise=opts[Math.floor(Math.random()*opts.length)]||null; renderMain(); setTimeout(()=>document.querySelector('.pick-card')?.scrollIntoView({block:'center',behavior:'smooth'}),30); } break;
+    // year in review + sharing
+    case 'recap-open': ui.recapYear=null; ui.sheet={type:'recap'}; renderSheet(); break;
+    case 'recap-year': ui.recapYear=+d.v; renderSheet(); break;
+    case 'recap-share': shareRecap().catch(()=>toast("Couldn't make the image.")); break;
+    case 'share-top': shareTop().catch(()=>toast("Couldn't make the image.")); break;
+    case 'map-wants': ui.mapWants=!ui.mapWants; renderMain(); break;
+    // custom categories
+    case 'cat-new': ui.sheet={type:'cat', k:null, draft:{name:'', one:'', emoji:CAT_EMOJI[0], color:P_COLORS[(CATS.length)%P_COLORS.length], styles:''}}; renderSheet(); setTimeout(()=>$('#cat-name')?.focus(),260); break;
+    case 'cat-edit': { const c=S.cats[d.k]; if(!c) break; ui.sheet={type:'cat', k:c.k, draft:{name:c.name, one:c.one||'', emoji:c.emoji, color:c.color, styles:(c.styles||[]).join(', ')}}; renderSheet(); } break;
+    case 'cat-emoji': catDraftSync(); ui.sheet.draft.emoji=d.v; renderSheet(); break;
+    case 'cat-color': catDraftSync(); ui.sheet.draft.color=d.v; renderSheet(); break;
+    case 'cat-save': { catDraftSync(); const sh=ui.sheet, dr=sh.draft; const name=dr.name.trim();
+      if(!name){ sh.error='Give the category a name.'; renderSheet(); break; }
+      if(CATS.some(c=>c.k!==sh.k && norm(c.name)===norm(name))){ sh.error='There is already a category with that name.'; renderSheet(); break; }
+      const k=sh.k||('c_'+uid()); const prev=S.cats[k]||{createdAt:Date.now()};
+      S.cats[k]={...prev, k, name, one:dr.one.trim()||name.toLowerCase(), emoji:dr.emoji, color:dr.color, styles:dr.styles.split(',').map(x=>x.trim()).filter(Boolean).slice(0,12)};
+      rebuildCats(); commit(); ui.cat=k; ui.sheet=null; ui.tab='lists'; render(); toast(sh.k?'Category saved':`${name} added`); } break;
+    case 'cat-del': { const sh=ui.sheet; if(Object.values(S.items).some(i=>i.cat===sh.k)) break;
+      if(!sh.armDel){ catDraftSync(); sh.armDel=true; renderSheet(); break; }
+      delete S.cats[sh.k]; for(const w of Object.values(S.wants)) if(w.cat===sh.k) delete S.wants[w.id];
+      rebuildCats(); ui.cat=CATS[0].k; commit(); ui.sheet=null; render(); toast('Category deleted'); } break;
+    // want to try
+    case 'want-new': startFlow('want',{cat:d.cat||ui.cat}); break;
+    case 'open-want': if(lmap) lmap.closePopup(); ui.sheet={type:'want', id:d.id}; renderSheet(); break;
+    case 'want-me': { const w=S.wants[d.id]; if(!w) break; const ids=w.wantIds||[]; const i=ids.indexOf(S.activeId); i>=0?ids.splice(i,1):ids.push(S.activeId); w.wantIds=ids; commit(); render(); toast(i>=0?'Taken off your list':'Added to your list'); } break;
+    case 'want-rank': { const w=S.wants[d.id]; if(!w) break; startFlow('new',{cat:w.cat, fromWant:w.id, prefill:{place:w.place, location:w.location||'', address:w.address||'', lat:w.lat??null, lng:w.lng??null}}); } break;
+    case 'want-map': ui.mapFocus='want:'+d.id; ui.mapWants=true; ui.mapScope='all'; ui.mapCat='all'; ui.sheet=null; ui.tab='map'; window.scrollTo(0,0); render(); break;
+    case 'want-del': if(!ui.sheet.armDel){ ui.sheet.armDel=true; renderSheet(); break; } delete S.wants[d.id]; commit(); ui.sheet=null; render(); toast('Removed'); break;
+    case 'want-save': {
+      const it=flow.item; it.place=it.place.trim(); it.location=it.location.trim();
+      const known=areaNames(Object.values(S.items)); if(known.has(norm(it.location))) it.location=known.get(norm(it.location));
+      if(!it.place){ flow.error='Add the place name.'; renderSheet(); $('.sheet-body').scrollTop=0; break; }
+      const me=S.activeId;
+      const dup=Object.values(S.wants).find(w=>w.cat===it.cat && norm(w.place)===norm(it.place));
+      if(dup){ if(!(dup.wantIds||[]).includes(me)) dup.wantIds=[...(dup.wantIds||[]), me]; commit(); closeSheet(); toast(`${dup.place} was already on the list. Added you.`); break; }
+      const id='w_'+uid();
+      S.wants[id]={id, cat:it.cat, place:it.place, location:it.location, address:it.address||'', lat:it.lat, lng:it.lng, notes:(it.notes||'').trim(), addedBy:me, wantIds:[me], createdAt:Date.now()};
+      commit(); ui.cat=it.cat; ui.tab='lists'; closeSheet(); toast('Saved to want-to-try'); } break;
+    // reactions & comments
+    case 'react': { const me=S.activeId; const key=d.id+'__'+me; const cur=S.reacts[key];
+      if(cur && cur.e===d.v) delete S.reacts[key]; else S.reacts[key]={itemId:d.id, pid:me, e:d.v, at:Date.now()};
+      commit(); renderSheet(); } break;
+    case 'comment-send': { const el=$('#c-text'); const text=(el?.value||'').trim(); if(!text) break;
+      const id='c_'+uid(); S.comments[id]={id, itemId:d.id, pid:S.activeId, text:text.slice(0,400), at:Date.now()}; ui.sheet.draft='';
+      commit(); renderSheet(); setTimeout(()=>{ const b=document.querySelector('.panel'); if(b) b.scrollTop=b.scrollHeight; },30); } break;
+    case 'comment-del': delete S.comments[d.id]; commit(); renderSheet(); break;
+    case 'install-hide': try{ localStorage.setItem('tummi_install_hide','1'); }catch(_){} renderMain(); break;
     case 'cmp-cat': ui.cmpCat=d.cat; renderMain(); break;
     case 'group-cat': ui.groupCat=d.cat; renderMain(); break;
     case 'gmin': ui.groupMin2=d.v==='1'; renderMain(); break;
@@ -1474,7 +1907,7 @@ document.addEventListener('click', e=>{
     case 'clear-demo': clearDemo(); render(); break;
     case 'reset':
       if(!ui.armReset){ ui.armReset=true; renderMain(); break; }
-      { const del=Object.keys(S.items); const keep=activeProfile(); S={profiles:[{...keep, demo:false}], activeId:keep.id, orders:{}, items:{}}; ui.armReset=false; ui.area=''; commit({del}); render(); toast('Everything erased'); }
+      { const del=Object.keys(S.items); const keep=activeProfile(); S={profiles:[{...keep, demo:false}], activeId:keep.id, orders:{}, items:{}, wants:{}, reacts:{}, comments:{}, cats:{}}; rebuildCats(); ui.armReset=false; ui.area=''; commit({del}); render(); toast('Everything erased'); }
       break;
     // profiles
     case 'new-profile': ui.sheet={type:'profile', id:null, draft:{name:'', color:P_COLORS[S.profiles.length%P_COLORS.length]}}; renderSheet(); setTimeout(()=>$('#pf-name')?.focus(),260); break;
@@ -1545,17 +1978,22 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ui.sheet && !(u
   if(loaded){ persisted=true; }
   else if(crew){
     // joined before but this phone's copy is gone: wait for the crew's data instead of inventing a profile
-    S={profiles:[{id:'p_wait', name:'Loading', color:P_COLORS[0], demo:true}], activeId:'p_wait', orders:{}, items:{}}; crewSync=null;
+    S={profiles:[{id:'p_wait', name:'Loading', color:P_COLORS[0], demo:true}], activeId:'p_wait', orders:{}, items:{}, wants:{}, reacts:{}, comments:{}, cats:{}}; crewSync=null;
   }
   else {
-    S={profiles:[{id:'p_me', name:'Andrew', color:'#DD5A3E'}], activeId:'p_me', orders:{}, items:{}};
+    S={profiles:[{id:'p_me', name:'Andrew', color:'#DD5A3E'}], activeId:'p_me', orders:{}, items:{}, wants:{}, reacts:{}, comments:{}, cats:{}};
     buildDemo(); persisted=false; // samples are shown, not saved, until you change something
   }
   ui.cmpA=S.activeId;
+  if(!seenAt()) setSeen(Date.now());
+  ensureS(); rebuildCats();
   if(crew) syncMode='crew';
   if(crew && loaded){ if(hasDemo()) stripDemo(); if(!S.profiles.length) S.profiles=[{id:'p_'+uid(), name:'Me', color:P_COLORS[0]}]; if(!profile(S.activeId)) S.activeId=S.profiles[0].id; }
   render();
   connectRemote();
+  if(!IN_CLAUDE && 'serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
   if(CREW_ON){
     if(crew){ startCrewLoop(); syncNow(); }
     else { let skip=false; try{ skip=!!localStorage.getItem('tummi_crew_skip'); }catch(_){}
