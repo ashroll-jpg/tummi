@@ -1,7 +1,7 @@
 // Tummi service worker: makes the app open offline and pick up new versions reliably.
 // The page itself is fetched fresh whenever there's a connection (falling back to the saved copy offline);
 // icons, Leaflet and fonts come from the cache. Data APIs (Firebase, search, map tiles) are never cached here.
-const VERSION = 'tummi-v1';
+const VERSION = 'tummi-1.5.0';   // keep in step with APP_VERSION in index.html
 const SHELL = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 const STATIC_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
