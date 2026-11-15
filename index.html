@@ -400,6 +400,41 @@ const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.
    the security rules (firebase/firestore.rules) only open a crew to its name + passcode. */
 const FIREBASE = { apiKey: 'AIzaSyB5gmvZ7TtLcsduaDusNr632xakbJmP1cU', projectId: 'tummi-53588' };
 const FIRESTORE_HOST = 'https://firestore.googleapis.com';
+
+/* ============ version + what's new ============
+   To release: bump APP_VERSION, add an entry at the top of CHANGELOG, and set the same
+   version in sw.js (VERSION) so phones refresh their offline copy. People who used an older
+   version see a "What's new" popup once; brand-new users don't. */
+const APP_VERSION = '1.5.0';
+const CHANGELOG = [
+  {v:'1.5.0', date:'2026-11-15', title:'Version numbers', items:[
+    ['🆕','What\'s new popup','After each update you\'ll see what changed, once. Find it again any time under Crew → People.'],
+  ]},
+  {v:'1.4.0', date:'2026-11-15', title:'The big one', items:[
+    ['📲','Installable app','Add Tummi to your home screen and it opens full screen, loads instantly and works offline.'],
+    ['🍽️','Where should we eat?','Crew → Where to? Pick who\'s eating and what you\'re craving, and Tummi suggests a spot. Or tap 🎲 Pick for us.'],
+    ['☆','Want-to-try list','Save places you\'ve heard about at the bottom of any food list. Friends can tap Me too, and they show up on the map.'],
+    ['📰','Crew feed','See what your crew ranked, saved and said. A red badge shows what\'s new.'],
+    ['🔥','Reactions and comments','React to and comment on anyone\'s ranking.'],
+    ['📸','Share cards','Share your top list as an image for iMessage or Instagram.'],
+    ['🍣','Your own categories','Tap + New at the end of the food tabs to add Sushi, Ramen, BBQ or anything else.'],
+    ['🏆','Year in review','Your best finds, taste twin and hottest take, at the top of the Feed.'],
+  ]},
+  {v:'1.3.0', date:'2026-11-14', title:'Find places faster', items:[
+    ['📍','City and restaurant search','Start typing a city or restaurant and pick it from the list. I\'m here now lists spots around you.'],
+  ]},
+  {v:'1.2.0', date:'2026-11-14', title:'Crews', items:[
+    ['👯','Shared crews','Join friends with a crew name and passcode to see each other\'s rankings.'],
+  ]},
+  {v:'1.1.0', date:'2026-11-14', title:'Fixes', items:[
+    ['🗺️','Map works again','The map shows streets instead of "API key required".'],
+    ['🎨','Home screen icon','Tummi has its own icon on your home screen.'],
+  ]},
+  {v:'1.0.0', date:'2026-11-14', title:'First version', items:[['🍔','Tummi','Rank burgers, pizza, tacos, wings and steaks with quick head-to-heads.']]},
+];
+const vNum = v => String(v||'0').split('.').map(Number).reduce((a,n)=>a*1000+(n||0),0);
+function lastSeenVersion(){ try{ return localStorage.getItem('tummi_version'); }catch(_){ return null; } }
+function markVersionSeen(){ try{ localStorage.setItem('tummi_version', APP_VERSION); }catch(_){} }
 const CREW_ON = !IN_CLAUDE && !!FIREBASE.apiKey && !!FIREBASE.projectId;
 const LEAFLET_JS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
 const LEAFLET_CSS='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
@@ -1391,6 +1426,7 @@ function viewProfiles(){
       ${!IN_CLAUDE && !crew?`<div class="two"><button class="btn sm" data-a="export">Back up</button><label class="btn sm" for="imp" style="cursor:pointer">Restore<input id="imp" type="file" accept="application/json,.json" data-change="import" hidden></label></div>`:''}
       ${!IN_CLAUDE && crew?`<button class="btn sm" data-a="export">Back up a copy</button>`:''}
       ${!hasDemo()&&!crew?'<button class="btn block" data-a="demo">Load sample data</button>':''}
+      <button class="btn block" data-a="news-all">What's new · v${APP_VERSION}</button>
       ${crew?'':`<button class="btn block danger ${ui.armReset?'armed':''}" data-a="reset">${ui.armReset?'Tap again to erase everything':'Erase all profiles and rankings'}</button>`}</div>`;
 }
 const VIEWS={lists:viewLists, map:viewMap, areas:viewAreas, crew:viewCrew};
@@ -1408,6 +1444,16 @@ function sheetCrew(){
     ${mine?`<label style="display:flex;gap:10px;align-items:flex-start;margin:0 2px 16px;font-size:15px;line-height:1.35"><input id="cr-bring" type="checkbox" ${sh.bring!==false?'checked':''} style="width:20px;height:20px;margin:1px 0 0;accent-color:var(--ink)"><span>Add the ${mine} ${mine===1?'ranking':'rankings'} on this phone to the crew</span></label>`:''}
     <button class="btn block primary" data-a="crew-go" ${sh.busy?'disabled':''}>${sh.busy?'Connecting…':create?'Start crew':'Join crew'}</button>
     <button class="btn block" data-a="close" style="margin-top:10px">${sh.first?'Not now, use this phone only':'Cancel'}</button></div>`;
+}
+function sheetNews(){
+  const sh=ui.sheet; const since=sh.since; const all=!since;
+  const list=CHANGELOG.filter(e=>all || vNum(e.v)>vNum(since));
+  return `<div class="panel" role="dialog" aria-label="What's new"><div class="grab"></div>
+    <div style="margin:0 4px 14px"><div class="muted" style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">${all?'All updates':'Updated to v'+APP_VERSION}</div><h2>What's new in Tummi</h2></div>
+    <div class="stack">${list.map((e,i)=>`<div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:${i?'10px':'0'} 4px 8px"><h3 style="font-size:17px">${esc(e.title)}</h3><span class="muted num" style="font-size:12.5px;font-weight:700">v${e.v} · ${fmtDate(e.date)}</span></div>
+      <div class="stack" style="gap:8px">${e.items.map(([em,t,d])=>`<div class="hl" style="grid-template-columns:34px 1fr"><div class="e">${em}</div><div><div class="t">${esc(t)}</div><div class="s" style="font-size:13.5px;line-height:1.4">${esc(d)}</div></div></div>`).join('')}</div></div>`).join('')}</div>
+    <button class="btn block primary" style="margin-top:16px" data-a="close">Got it</button>
+    ${!all?`<button class="btn block" style="margin-top:8px" data-a="news-all">See all updates</button>`:''}</div>`;
 }
 function sheetSwitcher(){
   return `<div class="panel" role="dialog" aria-label="Switch profile"><div class="grab"></div><h2 style="margin:0 4px 12px">Who's eating?</h2>
@@ -1742,7 +1788,7 @@ document.addEventListener('keydown', e=>{ const k=e.target.dataset?.ac; if(k && 
 function renderSheet(){
   const el=$('#sheet');
   if(!ui.sheet){ el.className=''; el.innerHTML=''; document.body.classList.remove('locked'); return; }
-  const builders={crew:sheetCrew, want:sheetWant, cat:sheetCat, recap:sheetRecap, switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
+  const builders={news:sheetNews, crew:sheetCrew, want:sheetWant, cat:sheetCat, recap:sheetRecap, switcher:sheetSwitcher, profile:sheetProfile, info:sheetInfo, item:sheetItem, flow:sheetFlow};
   const inner=builders[ui.sheet.type]();
   if(!ui.sheet){ renderSheet(); return; }
   const prevSc = el.querySelector('.sheet-body, .panel:not(.full)');
@@ -1869,6 +1915,7 @@ document.addEventListener('click', e=>{
       const id='c_'+uid(); S.comments[id]={id, itemId:d.id, pid:S.activeId, text:text.slice(0,400), at:Date.now()}; ui.sheet.draft='';
       commit(); renderSheet(); setTimeout(()=>{ const b=document.querySelector('.panel'); if(b) b.scrollTop=b.scrollHeight; },30); } break;
     case 'comment-del': delete S.comments[d.id]; commit(); renderSheet(); break;
+    case 'news-all': ui.sheet={type:'news', since:null}; renderSheet(); break;
     case 'install-hide': try{ localStorage.setItem('tummi_install_hide','1'); }catch(_){} renderMain(); break;
     case 'cmp-cat': ui.cmpCat=d.cat; renderMain(); break;
     case 'group-cat': ui.groupCat=d.cat; renderMain(); break;
@@ -1986,6 +2033,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ui.sheet && !(u
   }
   ui.cmpA=S.activeId;
   if(!seenAt()) setSeen(Date.now());
+  const seenV=lastSeenVersion();
+  const showNews = loaded && (!seenV || vNum(seenV)<vNum(APP_VERSION));
+  markVersionSeen();
   ensureS(); rebuildCats();
   if(crew) syncMode='crew';
   if(crew && loaded){ if(hasDemo()) stripDemo(); if(!S.profiles.length) S.profiles=[{id:'p_'+uid(), name:'Me', color:P_COLORS[0]}]; if(!profile(S.activeId)) S.activeId=S.profiles[0].id; }
@@ -1999,6 +2049,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape' && ui.sheet && !(u
     else { let skip=false; try{ skip=!!localStorage.getItem('tummi_crew_skip'); }catch(_){}
       if(!skip){ ui.sheet={type:'crew', mode:'join', first:true}; renderSheet(); } }
   }
+  if(showNews && !ui.sheet){ ui.sheet={type:'news', since: seenV || '1.3.0'}; renderSheet(); }
 })();
 </script>
 </body>
