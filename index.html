@@ -394,6 +394,8 @@ textarea.input{min-height:84px;resize:vertical}
    Inside Claude the page runs in a sandboxed frame: no map tiles, address search, GPS or downloads,
    but data syncs to the Claude account. Hosted on its own (e.g. GitHub Pages) everything works and
    data is kept on the device. */
+// Running inside the iPhone app (Capacitor) rather than a browser
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.claude; }catch(e){ return true; } })();
 /* Shared crews (hosted version only). Paste apiKey and projectId from Firebase console →
    Project settings → Your apps → SDK setup and configuration. Both are safe to publish:
@@ -935,7 +937,7 @@ function scopeSeg(current, action){
   return `<div class="seg"><button class="${current==='me'?'on':''}" data-a="${action}" data-v="me">${esc(activeProfile().name)}</button><button class="${current==='all'?'on':''}" data-a="${action}" data-v="all">Everyone</button></div>`;
 }
 function showInstallHint(){
-  if(IN_CLAUDE) return false;
+  if(IN_CLAUDE || IS_NATIVE) return false;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   const standalone=navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   let hidden=false; try{ hidden=!!localStorage.getItem('tummi_install_hide'); }catch(_){}
@@ -1130,8 +1132,10 @@ async function mountMap(){
   const prev = lmap ? {c:lmap.getCenter(), z:lmap.getZoom()} : null;
   if(lmap){ lmap.remove(); lmap=null; }
   lmap=L.map(el,{zoomControl:true, attributionControl:true});
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
+  const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
     attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(lmap);
+  let tileErrs=0;
+  tiles.on('tileerror', ()=>{ if(++tileErrs===4){ tiles.options.subdomains='abc'; tiles.setUrl('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png'); } });
   const {groups}=mapGroups(); const markers=[];
   groups.forEach(g=>{
     const b=bucketForScore(g.score);
@@ -1342,6 +1346,14 @@ async function shareCard({title, subtitle, rows, filename}){
   });
   g.font='500 28px Figtree, sans-serif'; g.fillStyle=ink2; g.fillText('Ranked on Tummi · '+location.host+location.pathname.replace(/index\.html$/,'').replace(/\/$/,''),80,H-60);
   const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
+  if(IS_NATIVE){
+    // iPhone app: save to the app's cache and open the native share sheet
+    const P=window.Capacitor.Plugins;
+    const data=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); });
+    const {uri}=await P.Filesystem.writeFile({path:filename, data, directory:'CACHE'});
+    try{ await P.Share.share({title, files:[uri]}); }catch(e){ if(!/cancel/i.test(e?.message||'')) throw e; }
+    return;
+  }
   const file=new File([blob], filename, {type:'image/png'});
   try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title}); return; } }catch(e){ if(e && e.name==='AbortError') return; }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },800);
