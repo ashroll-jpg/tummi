@@ -1,7 +1,7 @@
 {
   "name": "tummi",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Rank food spots with your crew. Web app + iPhone app (Capacitor).",
   "scripts": {
     "build": "node scripts/build-www.js",
