@@ -1,0 +1,11 @@
+{
+  "appId": "com.ashrolljpg.tummi",
+  "appName": "Tummi",
+  "webDir": "www",
+  "backgroundColor": "#FBF5EA",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#FBF5EA",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}

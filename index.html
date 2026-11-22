@@ -311,6 +311,9 @@ textarea.input{min-height:84px;resize:vertical}
 .emoji-grid button.on{border-color:var(--ink);background:var(--cream-2)}
 .install{display:flex;gap:10px;align-items:center;background:var(--cream-2);border-radius:var(--r-md);padding:10px 12px;margin-bottom:14px;font-size:13.5px;line-height:1.35}
 .install p{margin:0;flex:1}
+.pinmap-wrap{position:relative;flex:1;min-height:0}
+#pinmap{position:absolute;inset:0}
+.pin-cross{position:absolute;left:50%;top:50%;transform:translate(-6px,-44px);z-index:500;pointer-events:none}
 .ac{position:relative}
 .ac-list{display:none;flex-direction:column;margin-top:6px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);overflow:hidden;box-shadow:var(--shadow)}
 .ac-list.open{display:flex}
@@ -394,6 +397,8 @@ textarea.input{min-height:84px;resize:vertical}
    Inside Claude the page runs in a sandboxed frame: no map tiles, address search, GPS or downloads,
    but data syncs to the Claude account. Hosted on its own (e.g. GitHub Pages) everything works and
    data is kept on the device. */
+// Running inside the iPhone app (Capacitor) rather than a browser
+const IS_NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const IN_CLAUDE = (function(){ try{ return window.self!==window.top || !!window.claude; }catch(e){ return true; } })();
 /* Shared crews (hosted version only). Paste apiKey and projectId from Firebase console →
    Project settings → Your apps → SDK setup and configuration. Both are safe to publish:
@@ -405,8 +410,12 @@ const FIRESTORE_HOST = 'https://firestore.googleapis.com';
    To release: bump APP_VERSION, add an entry at the top of CHANGELOG, and set the same
    version in sw.js (VERSION) so phones refresh their offline copy. People who used an older
    version see a "What's new" popup once; brand-new users don't. */
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.5.1';
 const CHANGELOG = [
+  {v:'1.5.1', date:'2026-11-22', title:'Pin any place', items:[
+    ['🔎','Better place search','Find this place is more forgiving about spelling and looks near the city you picked.'],
+    ['📍','Can\'t find it? Pin it anyway','Type the street address, or tap Drop a pin and move the map to the spot.'],
+  ]},
   {v:'1.5.0', date:'2026-11-15', title:'Version numbers', items:[
     ['🆕','What\'s new popup','After each update you\'ll see what changed, once. Find it again any time under Crew → People.'],
   ]},
@@ -935,7 +944,7 @@ function scopeSeg(current, action){
   return `<div class="seg"><button class="${current==='me'?'on':''}" data-a="${action}" data-v="me">${esc(activeProfile().name)}</button><button class="${current==='all'?'on':''}" data-a="${action}" data-v="all">Everyone</button></div>`;
 }
 function showInstallHint(){
-  if(IN_CLAUDE) return false;
+  if(IN_CLAUDE || IS_NATIVE) return false;
   const ios=/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   const standalone=navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   let hidden=false; try{ hidden=!!localStorage.getItem('tummi_install_hide'); }catch(_){}
@@ -1123,6 +1132,13 @@ function popupHTML(g){
   return `<div class="pop"><h4>${esc(g.place)}</h4><div class="addr">${esc(g.address)}</div>
     ${g.rows.sort((a,b)=>b.score-a.score).map(r=>`<button class="pop-row" data-a="open-item" data-id="${r.item.id}" style="--cc:${CAT[r.item.cat].color}">${foodIcon(r.item.cat)}${multi?avatar(profile(r.pid),20):''}<span class="grow">${esc(r.item.dish||CAT[r.item.cat].name)}<br><small class="muted">#${r.rank} of ${ranked(r.pid,r.item.cat).length}${multi?' for '+esc(profile(r.pid).name):''}</small></span>${scoreBubble(r.score,r.bucket,'sm')}</button>`).join('')}</div>`;
 }
+function addTiles(map){
+  const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  let tileErrs=0;
+  tiles.on('tileerror', ()=>{ if(++tileErrs===4){ tiles.options.subdomains='abc'; tiles.setUrl('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png'); } });
+  return tiles;
+}
 async function mountMap(){
   const el=$('#map'); if(!el) return;
   try{ await loadLeaflet(); }catch(e){ el.innerHTML='<div class="empty" style="height:100%;justify-content:center"><h3>Map didn\'t load</h3><p>Check your connection and open the Map tab again.</p></div>'; return; }
@@ -1130,8 +1146,7 @@ async function mountMap(){
   const prev = lmap ? {c:lmap.getCenter(), z:lmap.getZoom()} : null;
   if(lmap){ lmap.remove(); lmap=null; }
   lmap=L.map(el,{zoomControl:true, attributionControl:true});
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
-    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(lmap);
+  addTiles(lmap);
   const {groups}=mapGroups(); const markers=[];
   groups.forEach(g=>{
     const b=bucketForScore(g.score);
@@ -1342,6 +1357,14 @@ async function shareCard({title, subtitle, rows, filename}){
   });
   g.font='500 28px Figtree, sans-serif'; g.fillStyle=ink2; g.fillText('Ranked on Tummi · '+location.host+location.pathname.replace(/index\.html$/,'').replace(/\/$/,''),80,H-60);
   const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
+  if(IS_NATIVE){
+    // iPhone app: save to the app's cache and open the native share sheet
+    const P=window.Capacitor.Plugins;
+    const data=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); });
+    const {uri}=await P.Filesystem.writeFile({path:filename, data, directory:'CACHE'});
+    try{ await P.Share.share({title, files:[uri]}); }catch(e){ if(!/cancel/i.test(e?.message||'')) throw e; }
+    return;
+  }
   const file=new File([blob], filename, {type:'image/png'});
   try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title}); return; } }catch(e){ if(e && e.name==='AbortError') return; }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },800);
@@ -1525,6 +1548,8 @@ function pinField(it){
   return `<div class="field"><span class="lab">Map pin <span class="opt">puts it on the map</span></span>
     ${hasPin(it)?`<div class="pinned"><span style="flex:none;width:18px;height:18px;display:grid">${ic.map}</span><span>${esc(it.address||'Pinned')}</span><button class="small-btn" data-a="geo-clear">Remove</button></div>`:''}
     <div class="two"><button class="btn sm" data-a="geo-search">Find this place</button><button class="btn sm" data-a="geo-here">I'm here now</button></div>
+    <div class="two"><button class="btn sm" data-a="geo-addr-open">Type an address</button><button class="btn sm" data-a="geo-drop">Drop a pin</button></div>
+    ${flow.addrOpen?`<div class="cbox" style="margin:0"><input id="f-addr" class="input" value="${esc(flow.addrQ||'')}" placeholder="e.g. 123 Main St, Royal Oak" autocomplete="street-address" maxlength="120"><button class="btn sm primary" data-a="geo-addr">Search</button></div>`:''}
     ${flow.geoMsg?`<span class="opt">${esc(flow.geoMsg)}</span>`:''}
     ${flow.geoResults?.length?`<div class="geo-results">${flow.geoResults.map((g,i)=>`<button data-a="geo-pick" data-i="${i}"><b>${esc(g.name)}</b><small>${esc(g.addr)}</small></button>`).join('')}</div>`:''}</div>`;
 }
@@ -1588,9 +1613,26 @@ function flowResult(){
   </div></div>
   <div class="sheet-foot"><div class="two"><button class="btn" data-a="flow-another">Rank another</button><button class="btn primary" data-a="flow-done">Done</button></div></div>`;
 }
+function flowPin(){
+  return `<div class="sheet-head"><button data-a="pin-back" aria-label="Back">${ic.back}</button><div class="t">Drop a pin</div><span></span></div>
+  <div class="pinmap-wrap"><div id="pinmap" role="application" aria-label="Move the map to put the pin on the spot"></div><div class="pin-cross" aria-hidden="true"><div class="pin" style="--b:var(--burger);--bt:#fff"><span>☆</span></div></div>
+    <button class="map-btn" data-a="pin-me">${ic.map.replace('<svg','<svg width="16" height="16"')} Near me</button></div>
+  <div class="sheet-foot"><p class="muted" style="margin:0 0 10px;font-size:13.5px;text-align:center">Drag the map until the pin sits on ${esc(flow.item.place.trim()||'the spot')}.</p><button class="btn primary block" data-a="pin-use">Use this spot</button></div>`;
+}
+let pmap=null;
+async function mountPinMap(){
+  const el=$('#pinmap'); if(!el) return;
+  try{ await loadLeaflet(); }catch(e){ el.innerHTML='<div class="empty" style="height:100%;justify-content:center"><h3>Map didn\'t load</h3><p>Check your connection and try again.</p></div>'; return; }
+  if(!document.body.contains(el) || !flow) return;
+  if(pmap){ pmap.remove(); pmap=null; }
+  const it=flow.item; const c= hasPin(it)? {lat:it.lat, lng:it.lng} : acCenter();
+  pmap=L.map(el,{zoomControl:true, attributionControl:true}).setView(c?[c.lat,c.lng]:[42.73,-84.55], c?16:7);
+  addTiles(pmap);
+  if(!c) flow.geoMsg='';
+}
 function sheetFlow(){
   if(!flow) return '';
-  const body={details:flowDetails, bucket:flowBucket, compare:flowCompare, result:flowResult}[flow.step]();
+  const body={details:flowDetails, bucket:flowBucket, compare:flowCompare, result:flowResult, pin:flowPin}[flow.step]();
   return `<div class="panel full" role="dialog" aria-label="Rank">${body}</div>`;
 }
 function chooseBucket(k){
@@ -1647,21 +1689,39 @@ function finalize(pos, tieWithId){
 /* ---- address search (OpenStreetMap Nominatim, hosted version only) ---- */
 function areaOf(a){ return a? (a.city||a.town||a.village||a.suburb||a.hamlet||a.county||'') : ''; }
 function shortAddr(a,full){ if(!a) return full||''; const street=[a.house_number,a.road].filter(Boolean).join(' '); return [street, areaOf(a), a.state].filter(Boolean).join(', ') || full; }
-async function geoSearch(){
-  const it=flow.item;
-  if(!it.place.trim()){ flow.geoMsg='Type the place name first.'; renderSheet(); return; }
+async function geoSearch(mode){
+  const it=flow.item; const byAddr=mode==='addr';
+  const q0=(byAddr? (flow.addrQ||'') : it.place).trim();
+  if(!q0){ flow.geoMsg= byAddr? 'Type the street address first.' : 'Type the place name first.'; renderSheet(); return; }
   flow.geoMsg='Searching…'; flow.geoResults=[]; renderSheet();
-  const q=[it.place.trim(), it.location.trim()].filter(Boolean).join(', ');
-  let url=`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=us&q=${encodeURIComponent(q)}`;
-  if(flow.here){ const {lat,lng}=flow.here; url+=`&viewbox=${lng-.1},${lat+.1},${lng+.1},${lat-.1}`; }
+  const loc=it.location.trim(); const c=acCenter();
+  const results=[]; const seen=new Set();
+  const add=r=>{ const k=r.lat.toFixed(4)+','+r.lng.toFixed(4); if(seen.has(k)||isNaN(r.lat)) return; seen.add(k); results.push(r); };
+  // 1. Photon: forgiving about spelling, and biased toward the chosen city / where you are
   try{
-    const r=await fetch(url,{headers:{'Accept':'application/json'}}); if(!r.ok) throw 0;
-    const j=await r.json();
-    if(!flow) return; syncForm();
-    flow.geoResults=j.map(x=>({name:x.name||x.display_name.split(',')[0], addr:shortAddr(x.address,x.display_name), lat:+x.lat, lng:+x.lon, area:areaOf(x.address)}));
-    flow.geoMsg= j.length? 'Tap the right one:' : (it.location? 'No match. Try "I\'m here now" while you\'re at the place.' : 'No match. Add the city in Location and try again.');
-  }catch(e){ if(!flow) return; syncForm(); flow.geoMsg="Search isn't working right now. Try again in a moment."; }
+    const params=new URLSearchParams({q: loc && !q0.toLowerCase().includes(loc.toLowerCase())? `${q0}, ${loc}` : q0, limit:'8', lang:'en'});
+    if(c){ params.set('lat',c.lat); params.set('lon',c.lng); params.set('location_bias_scale','0.5'); params.set('zoom','12'); }
+    const r=await fetch(PHOTON+'?'+params,{headers:{Accept:'application/json'}}); if(r.ok){ const j=await r.json();
+      (j.features||[]).map(photonPlace).forEach(x=>{ const p=x.p; const nm=p.name||[x.street].filter(Boolean)[0]||q0;
+        add({name:nm, addr:[x.street, x.city, x.state].filter(Boolean).join(', ')||nm, lat:x.lat, lng:x.lng, area:x.city}); }); }
+  }catch(e){}
+  if(!flow) return;
+  // 2. Nominatim as a second opinion
+  if(results.length<3){
+    try{
+      let url=`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&q=${encodeURIComponent([q0, byAddr?'':loc].filter(Boolean).join(', '))}`;
+      if(c) url+=`&viewbox=${c.lng-.5},${c.lat+.5},${c.lng+.5},${c.lat-.5}`;
+      const r=await fetch(url,{headers:{Accept:'application/json'}}); if(r.ok){ const j=await r.json();
+        j.forEach(x=>add({name:x.name||x.display_name.split(',')[0], addr:shortAddr(x.address,x.display_name), lat:+x.lat, lng:+x.lon, area:areaOf(x.address)})); }
+    }catch(e){}
+  }
+  if(!flow) return; syncForm();
+  if(c) results.sort((a,b)=>Math.hypot(a.lat-c.lat,a.lng-c.lng)-Math.hypot(b.lat-c.lat,b.lng-c.lng));
+  flow.geoResults=results.slice(0,8).map(r=>({...r, addrPick:byAddr}));
+  flow.geoMsg= results.length? 'Tap the right one:' : byAddr? "Couldn't find that address. Check the spelling, or drop the pin yourself." : "Couldn't find it. Try the street address, or drop the pin yourself.";
+  if(!results.length && !byAddr) flow.addrOpen=true;
   renderSheet();
+  if(flow.addrOpen && !results.length) setTimeout(()=>$('#f-addr')?.focus(),60);
 }
 function geoHere(){
   if(!navigator.geolocation){ flow.geoMsg='Location isn\'t available in this browser.'; renderSheet(); return; }
@@ -1779,9 +1839,10 @@ async function nearbyPlaces(lat,lng){
     syncForm(); flow.geoResults=rows; flow.geoMsg='Pinned to where you are. Eating at one of these?'; renderSheet();
   }catch(e){}
 }
-document.addEventListener('input', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k, true); if(e.target.id==='c-text' && ui.sheet) ui.sheet.draft=e.target.value; });
+document.addEventListener('input', e=>{ if(e.target.id==='f-addr' && flow) flow.addrQ=e.target.value; const k=e.target.dataset?.ac; if(k) acInput(k, true); if(e.target.id==='c-text' && ui.sheet) ui.sheet.draft=e.target.value; });
 document.addEventListener('focusin', e=>{ const k=e.target.dataset?.ac; if(k) acInput(k); });
 document.addEventListener('focusout', e=>{ const k=e.target.dataset?.ac; if(k) setTimeout(()=>{ const el=document.getElementById(k==='loc'?'f-loc':'f-place'); if(el && document.activeElement!==el){ ac[k].list=[]; acRender(k); } },250); });
+document.addEventListener('keydown', e=>{ if(e.target.id==='f-addr' && e.key==='Enter'){ e.preventDefault(); flow.addrQ=e.target.value; geoSearch('addr'); return; } });
 document.addEventListener('keydown', e=>{ const k=e.target.dataset?.ac; if(k && e.key==='Enter' && ac[k].list.length){ e.preventDefault(); syncForm(); acPick(k,0); } });
 
 /* ============ render ============ */
@@ -1810,7 +1871,7 @@ function renderMain(){
   if(ui.flash){ const id=ui.flash; setTimeout(()=>{ if(ui.flash===id) ui.flash=null; },1500); }
 }
 function render(){ renderMain(); renderSheet(); }
-function closeSheet(){ ui.sheet=null; flow=null; render(); }
+function closeSheet(){ if(pmap){ pmap.remove(); pmap=null; } ui.sheet=null; flow=null; render(); }
 
 /* ============ photo ============ */
 function resizeImage(file){
@@ -1994,8 +2055,20 @@ document.addEventListener('click', e=>{
     case 'f-with': { const w=flow.item.withIds; const i=w.indexOf(d.id); i>=0?w.splice(i,1):w.push(d.id); renderSheet(); } break;
     case 'f-nophoto': flow.item.photo=null; renderSheet(); break;
     case 'geo-search': geoSearch(); break;
+    case 'geo-addr-open': flow.addrOpen=!flow.addrOpen; renderSheet(); if(flow.addrOpen) setTimeout(()=>$('#f-addr')?.focus(),60); break;
+    case 'geo-addr': flow.addrQ=$('#f-addr')?.value||''; geoSearch('addr'); break;
+    case 'geo-drop': flow.step='pin'; flow.geoResults=[]; flow.geoMsg=''; renderSheet(); mountPinMap(); break;
+    case 'pin-back': if(pmap){ pmap.remove(); pmap=null; } flow.step='details'; renderSheet(); break;
+    case 'pin-me': if(!navigator.geolocation||!pmap) break; navigator.geolocation.getCurrentPosition(pos=>{ if(pmap) pmap.setView([pos.coords.latitude,pos.coords.longitude],17); }, ()=>toast('Location permission was denied.'), {enableHighAccuracy:true, timeout:12000}); break;
+    case 'pin-use': { if(!pmap) break; const c=pmap.getCenter(); const lat=+c.lat.toFixed(5), lng=+c.lng.toFixed(5);
+      Object.assign(flow.item,{lat, lng, address:'Dropped pin'}); pmap.remove(); pmap=null; flow.step='details'; flow.geoMsg='Pinned.'; renderSheet();
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat=${lat}&lon=${lng}`).then(r=>r.json()).then(j=>{
+        if(!flow || flow.item.lat!==lat) return; syncForm();
+        flow.item.address=shortAddr(j.address,j.display_name)||'Dropped pin';
+        if(!flow.item.location.trim()) flow.item.location=areaOf(j.address);
+        if(flow.step==='details') renderSheet(); }).catch(()=>{}); } break;
     case 'geo-here': geoHere(); break;
-    case 'geo-pick': { const g=flow.geoResults[+d.i]; Object.assign(flow.item,{lat:g.lat, lng:g.lng, address:g.addr}); if(g.setName) flow.item.place=g.name; if(!flow.item.location.trim() && g.area) flow.item.location=g.area; flow.geoResults=[]; flow.geoMsg=''; renderSheet(); } break;
+    case 'geo-pick': { const g=flow.geoResults[+d.i]; Object.assign(flow.item,{lat:g.lat, lng:g.lng, address:g.addrPick? (g.addr||g.name) : g.addr}); if(g.setName) flow.item.place=g.name; flow.addrOpen=false; if(!flow.item.location.trim() && g.area) flow.item.location=g.area; flow.geoResults=[]; flow.geoMsg=''; renderSheet(); } break;
     case 'ac-pick': acPick(d.k, +d.i); break;
     case 'geo-clear': Object.assign(flow.item,{lat:null,lng:null,address:''}); renderSheet(); break;
     case 'flow-next': case 'flow-save': {
